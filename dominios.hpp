@@ -291,6 +291,8 @@ private:
 public:
     void setValor(const string& valor);
     string getValor() const;
+    //adicionei para calcular tempo de ciclo, calcula minutos desde 2000
+    long paraMinutos() const;
 };
 
 #endif // DOMINIOS_HPP_INCLUDED

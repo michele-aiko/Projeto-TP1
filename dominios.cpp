@@ -258,3 +258,32 @@ string Timestamp::getValor() const {
     return valor;
 };
 
+//calcula minutos desde 2000, usado para calcular diferença de valores
+long Timestamp::paraMinutos() const {
+    stringstream ss(valor);
+    string sDia, mes, sAno, horario;
+    getline(ss, sDia, '-');
+    getline(ss, mes, '-');
+    getline(ss, sAno, '-');
+    getline(ss, horario);
+
+    int dia = stoi(sDia);
+    int ano = stoi(sAno);
+    int hora = stoi(horario.substr(0, 2));
+    int minuto = stoi(horario.substr(3, 2));
+
+    static const string meses[] = {"JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ"};
+
+    long totalDias = 0;
+    for (int a = 2000; a < ano; a++) {
+        totalDias += ehBissexto(a) ? 366 : 365;
+    }
+    for (int i = 0; i < 12; i++) {
+        if (mes == meses[i]) break;
+        totalDias += obterDiasNoMes(meses[i], ano);
+    }
+    totalDias += dia - 1;
+
+    return totalDias * 1440 + hora * 60 + minuto;
+}
+
