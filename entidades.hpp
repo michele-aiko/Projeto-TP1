@@ -2,6 +2,7 @@
 #define ENTIDADES_HPP_INCLUDED
 
 #include "dominios.hpp"
+#include <vector>
 
 using namespace std;
 
@@ -17,8 +18,10 @@ private:
     Timestamp inicio;
     Timestamp termino;
 
+    static void verificarPermissao(const Papel& papel, const std::vector<std::string>& permitidos);
+
 public:
-    CartaoDeAtividade(const Identificador& id, const Nome& nome,
+    CartaoDeAtividade(const Papel& papel, const Identificador& id, const Nome& nome,
                        const Texto& descricao, const Prioridade& prioridade,
                        const Tamanho& tamanho, const Timestamp& entrada);
 
@@ -32,15 +35,15 @@ public:
     Timestamp getInicio() const { return inicio; }
     Timestamp getTermino() const { return termino; }
 
-    void setNome(const Nome& novoNome);
-    void setDescricao(const Texto& novaDescricao);
-    void setPrioridade(const Prioridade& novaPrioridade);
-    void setTamanho(const Tamanho& novoTamanho);
+    void setNome(const Papel& papel, const Nome& novoNome);
+    void setDescricao(const Papel& papel, const Texto& novaDescricao);
+    void setPrioridade(const Papel& papel, const Prioridade& novaPrioridade);
+    void setTamanho(const Papel& papel, const Tamanho& novoTamanho);
 
-    void mover(const Timestamp& momento);
+    void mover(const Papel& papel, const Timestamp& momento);
 
-    float getTempoDeCiclo() const;
-    float getLeadTime() const;
+    float getTempoDeCiclo(const Papel& papel) const;
+    float getLeadTime(const Papel& papel) const;
 };
 
 #endif
