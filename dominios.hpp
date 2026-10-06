@@ -8,9 +8,6 @@
 #include <stdexcept>
 
 
-// [17:46, 08/09/2026] Joyce unb: Eu terminei o "email" aquele dia, aí comecei o "identificador"
-// [17:48, 08/09/2026] Joyce unb: Posso fazer também o "limite","papel","prioridade", "senha" e "timestamp" que já aproveito uns códigos de outros exercícios
-
 using namespace std;
 
 //CLASSE ESTADO AMIGOS TP1
@@ -158,20 +155,89 @@ class Texto {
         }
 };
 
-//classe email
-class Email {
-private:
-    string valor;
-    void validar(const string& email);
+class Email { //Formato válido: parte-local@dominio
+        private:
+            static const int LIMLOCAL = 64; 
+            static const int LIMDOMINIO = 255; 
+            string parteLocalEmail;
+            string dominioEmail;
+            void validarEmail(string); 
 
-    bool eAlfanumerico(char c) const;
-    bool validarParteLocal(const string& local) const;
-    bool validarDominio(const string& dominio) const;
+        public:
+	    //Construtores precisa??
+            Email();
+            Email(string,string);
+	    //Setters e Getters
+            void setEmail(string);
+            string getEmail() const;
 
-public:
-    void setValor(const string& valor);
-    string getValor() const;
 };
+
+inline void Email::validarEmail(string novoEmail){ //Pode conter letra (a-z), dígito (0-9) ou ponto(.) ou hífen (-), não pode iniciar ou terminar com ponto ou hífen, ponto ou hifen deve ser seguido de letra(s) ou digito(s)
+	string parteLocal;
+	string dominio;
+
+	//Divide novoEmail entre as variáveis parteLocal e dominio
+	size_t posArroba = novoEmail.find('@'); //Busca posição de '@' na string
+	if(posArroba == string::npos){ //A função find retorna "npos" se não encontrar o caracter de busca
+		throw invalid_argument("Argumento inválido");
+	}
+	parteLocal = novoEmail.substr(0, posArroba); //Armazena o caracter da posição '0' até a posição imediatamente anterior ao "@"
+	dominio = novoEmail.substr(posArroba + 1); //Omitindo o 1º parametro, armazena todos os caracteres da posição indicada até o caracter imediatamente anterior ao '/0'
+	
+	//Testar email conforme critérios estabelecidos nos requisitos não pode iniciar ou terminar com ponto ou hífen, ponto ou hifen deve ser seguido de letra(s) ou digito(s)
+	//Limites
+	if(parteLocal.length() > LIMLOCAL || dominio.length() > LIMDOMINIO){
+		throw invalid_argument("Argumento inválido");
+	}
+	
+    	string partesEmail[2] = {parteLocal, dominio}; // O array neste formato permite passar as duas strings ao mesmo tempo pelos testes sem repetir código
+    
+    	for(int p = 0; p < 2; p++) {
+        	string str = partesEmail[p];
+        
+        // Verifica se a string está vazia ou inicia/termina com . ou -
+        	if (str.empty() || str.front() == '.' || str.front() == '-' || str.back() == '.' || str.back() == '-') {
+            		throw invalid_argument("Argumento inválido");
+        	}
+
+        //Pode conter letra (a-z), dígito (0-9) ou ponto(.) ou hífen (-)
+        	for(size_t i = 0; i < str.length(); i++){
+            		char c = str[i];
+            
+            		if(!isalnum(c) && c != '.' && c != '-'){
+                		throw invalid_argument("Argumento inválido");
+            		}
+            
+         // Ponto ou hífen seguido de letra ou dígito
+            		if(c == '.' || c == '-'){
+                		char proximo = str[i + 1];
+                		if(!isalnum(proximo)){
+                    			throw invalid_argument("Argumento inválido");
+                		}
+            		}
+        	}
+	}
+}
+
+inline void Email::setEmail(string novoEmail){
+	validarEmail(novoEmail);
+	
+	string parteLocal;
+	string dominio;
+	
+	size_t posArroba = novoEmail.find('@');
+	parteLocal = novoEmail.substr(0, posArroba);
+	dominio = novoEmail.substr(posArroba + 1);
+	
+	this->parteLocalEmail = parteLocal;
+	this->dominioEmail = dominio;
+}
+
+inline string Email::getEmail() const{
+	string email = parteLocalEmail + '@' + dominioEmail;
+	return email;
+}	
 
 
 //CLASSE IDENTIFICADOR
