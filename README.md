@@ -112,30 +112,14 @@ A arquitetura é dividida em **4 módulos principais**:
 
 ### 3. Tabela de Critérios de Avaliação do Trabalho
 
-| Item|     Critério Avaliado    |                                                  Ações Necessárias                                                     |
-|:---:|:------------------------:|:----------------------------------------------------------------------------------------------------------------------:|
-|**1**|**Classes de Domínio**    |• Criar classe para cada um dos 11 domínios.
-                                  • Implementar `setValor` (com `throw std::invalid_argument`) e `getValor`.
-                                  • Documentar classe e membros públicos com Doxygen (`///`).
-                                  • Gerar pasta de documentação em HTML via Doxygen.
-                                  • Testes unitários demonstrando 100% de funcionamento. |                                                                    
-|**2**|**Classes de Entidade**   |• Criar classes `Pessoa`, `Projeto`, `Quadro` e `CartaoDeAtividade`.
-                                  • Atributos obrigatoriamente do tipo de classes de domínio.<br>• Métodos públicos `set` e `get` para todos os atributos.
-                                  • Documentação Doxygen completa em cada classe e membro.
-                                  • Fornecer páginas HTML do Doxygen e testes unitários. |
-|**3**|**Modelo de Arquitetura** |• Diagrama UML oficial da arquitetura (módulos, interfaces e relacionamentos em PDF).
-                                  • Descrição textual detalhada das responsabilidades de cada módulo.
-                                  • Declaração de interfaces em C++ usando classes puramente abstratas (`virtual = 0`).
-                                  • Documentação Doxygen de todas as interfaces e geração de HTML. |
-|**4**|**Camada de Apresentação**|• Implementar classes controladoras de tela (UI) com pré-validação de entrada.
-                                  • Garantir dependência exclusiva das interfaces abstratas de serviço.
-                                  • Comentários Doxygen em todas as classes e membros.<br>• Documentação HTML e demonstração do correto funcionamento. |
-|**5**|**Camada de Serviço**     |• Implementar classes de serviço/negócio que realizam as interfaces abstratas.
-                                  • Lógica de negócio completa (WIP, permissões gestor/dev, métricas).<br>• Armazenamento funcional (memória ou SQLite).
-                                  • Documentação Doxygen, HTML e testes integrados com sucesso. |
-|**6**|**Vídeo do Teste Fumaça** |• Fornecer vídeo executando o código integrado compilado no Code::Blocks.
-                                  • Executar com sucesso o teste fumaça cobrindo as **26 funcionalidades** sem falhas. |
-
+| Item | Critério Avaliado | Ações Necessárias para Obter 100% da Nota |
+|:--:|:---|:---|
+| **1** | **Classes de Domínio** | • Criar classe para cada um dos 11 domínios.<br>• Implementar `setValor` (com `throw std::invalid_argument`) e `getValor`.<br>• Documentar classe e membros públicos com Doxygen (`///`).<br>• Gerar pasta de documentação em HTML via Doxygen.<br>• Testes unitários demonstrando 100% de funcionamento. |
+| **2** | **Classes de Entidade** | • Criar classes `Pessoa`, `Projeto`, `Quadro` e `CartaoDeAtividade`.<br>• Atributos obrigatoriamente do tipo de classes de domínio.<br>• Métodos públicos `set` e `get` para todos os atributos.<br>• Documentação Doxygen completa em cada classe e membro.<br>• Fornecer páginas HTML do Doxygen e testes unitários. |
+| **3** | **Modelo de Arquitetura** | • Diagrama UML oficial da arquitetura (módulos, interfaces e relacionamentos em PDF).<br>• Descrição textual detalhada das responsabilidades de cada módulo.<br>• Declaração de interfaces em C++ usando classes puramente abstratas (`virtual = 0`).<br>• Documentação Doxygen de todas as interfaces e geração de HTML. |
+| **4** | **Camada de Apresentação** | • Implementar classes controladoras de tela (UI) com pré-validação de entrada.<br>• Garantir dependência exclusiva das interfaces abstratas de serviço.<br>• Comentários Doxygen em todas as classes e membros.<br>• Documentação HTML e demonstração do correto funcionamento. |
+| **5** | **Camada de Serviço** | • Implementar classes de serviço/negócio que realizam as interfaces abstratas.<br>• Lógica de negócio completa (WIP, permissões gestor/dev, métricas).<br>• Armazenamento funcional (memória ou SQLite).<br>• Documentação Doxygen, HTML e testes integrados com sucesso. |
+| **6** | **Vídeo do Teste Fumaça** | • Fornecer vídeo executando o código integrado compilado no Code::Blocks.<br>• Executar com sucesso o teste fumaça cobrindo as **26 funcionalidades** sem falhas. |
 ---
 
 ## Como Compilar e Executar no Code::Blocks
