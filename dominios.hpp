@@ -34,32 +34,32 @@ public:
     inline static const std::string FAZENDO = "FAZENDO";
     inline static const std::string FEITO = "FEITO";
 
-    ///
-    /// @brief Construtor da classe Estado, deve incluir o método de validação do estado.
-    /// @details Inicializa o objeto com o estado "A FAZER" por padrão ou valida o parâmetro informado.
-    /// @param Objeto std::string contendo o estado inicial (padrão: A_FAZER).
-    /// @throw std::invalid_argument Lançada se o estadoInicial informado for inválido.
+///
+/// @brief Construtor da classe Estado, deve incluir o método de validação do estado.
+/// @details Inicializa o objeto com o estado "A FAZER" por padrão ou valida o parâmetro informado.
+/// @param Objeto std::string contendo o estado inicial (padrão: A_FAZER).
+/// @throw std::invalid_argument Lançada se o estadoInicial informado for inválido.
     ///
     Estado(const std::string& estadoInicial = A_FAZER);
 
-    ///
-    /// @brief Atribui e valida o valor do estado
-    /// @details Invoca o método validar() e, se aprovado, armazena o novo estado.
-    /// @param Objeto std::string contendo o novo estado.
-    /// @throw std::invalid_argument Lançada se o novoEstado for diferente das opções permitidas.
-    ///
+///
+/// @brief Atribui e valida o valor do estado
+/// @details Invoca o método validar() e, se aprovado, armazena o novo estado.
+/// @param Objeto std::string contendo o novo estado.
+/// @throw std::invalid_argument Lançada se o novoEstado for diferente das opções permitidas.
+///
     void setEstado(const std::string& novoEstado);
 
-    ///
-    /// @brief Obtém o valor do estado armazenado
-    /// @return Objeto std::string contendo o estado atual.
-    ///
+///
+/// @brief Obtém o valor do estado armazenado
+/// @return Objeto std::string contendo o estado atual.
+///
     string getEstado() const;
 
-    ///
-    /// @brief Retorna a lista contendo as opções válidas pré-existentes de estado.
-    /// @return Objeto std::vector<std::string> contendo {"A FAZER", "FAZENDO", "FEITO"}.
-    ///
+///
+/// @brief Retorna a lista contendo as opções válidas pré-existentes de estado.
+/// @return Objeto std::vector<std::string> contendo {"A FAZER", "FAZENDO", "FEITO"}.
+///
     static std::vector<std::string> getOpcoes();
 };
 
