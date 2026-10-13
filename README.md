@@ -96,6 +96,36 @@ A arquitetura é dividida em **4 módulos principais**:
 
 ---
 
+### Mapeamento de Entidades e seus Domínios
+
+Cada classe de entidade é composta obrigatoriamente por atributos que são instâncias de classes de domínio. A tabela abaixo especifica os domínios necessários para a criação de cada uma das 4 entidades do sistema:
+
+| Entidade | Atributo | Domínio Requerido | Descrição e Papel no Sistema |
+|:---|:---|:---|:---|
+| **Pessoa** | `email` | **Email** | Chave Primária. Endereço de e-mail de identificação do usuário. |
+| | `nome` | **Nome** | Nome completo do usuário (até 15 caracteres). |
+| | `senha` | **Senha** | Senha de acesso alfanumérica (5 caracteres). |
+| | `papel` | **Papel** | Função no sistema (`GESTOR` ou `DESENVOLVEDOR`). |
+| **Projeto** | `identificador` | **Identificador** | Chave Primária. Código de 6 caracteres do projeto (3 letras e 3 dígitos). |
+| | `nome` | **Nome** | Nome do projeto (até 15 caracteres). |
+| | `descricao` | **Texto** | Descrição do projeto (até 30 caracteres). |
+| | `inicio` | **Timestamp** | Data e hora de início do projeto (`DIA-MÊS-ANO-HORÁRIO`). |
+| | `termino` | **Timestamp** | Data e hora de término do projeto (`DIA-MÊS-ANO-HORÁRIO`). |
+| **Quadro** | `identificador` | **Identificador** | Chave Primária. Código identificador do quadro Kanban. |
+| | `nome` | **Nome** | Nome do quadro (até 15 caracteres). |
+| | `limite` | **Limite** | Limite máximo de WIP para a coluna `FAZENDO` (inteiro de 1 a 25). |
+| **Cartão de Atividade** | `identificador` | **Identificador** | Chave Primária. Código identificador do cartão. |
+| | `nome` | **Nome** | Título/Nome da atividade (até 15 caracteres). |
+| | `descricao` | **Texto** | Descrição detalhada da tarefa (até 30 caracteres). |
+| | `prioridade` | **Prioridade** | Nível de urgência da tarefa (`ALTA`, `MEDIA`, `BAIXA`). |
+| | `estado` | **Estado** | Coluna do quadro (`A FAZER`, `FAZENDO`, `FEITO`). |
+| | `tamanho` | **Tamanho** | Estimativa de porte da tarefa (`GRANDE`, `MÉDIO`, `PEQUENO`). |
+| | `entrada` | **Timestamp** | Data/hora em que a tarefa foi criada (`A FAZER`). |
+| | `inicio` | **Timestamp** | Data/hora em que a tarefa entrou na coluna `FAZENDO`. |
+| | `termino` | **Timestamp** | Data/hora em que a tarefa foi movida para `FEITO`. |
+
+---
+
 ## Estrutura de Testes
 
 ### 1. Testes Unitários (Unit Testing)
