@@ -10,28 +10,57 @@
 
 using namespace std;
 
-//CLASSE ESTADO AMIGOS TP1
+///
+/// @brief Representa o domínio Estado de um cartão de atividade Kanban.
+/// @details Garante que o estado seja restrito a uma das três opções pré-existentes: 
+///          "A FAZER", "FAZENDO" ou "FEITO". 
+///          Qualquer tentativa de atribuir outro valor resultará em lançamento de exceção.
+///
 class Estado {
-    private:
-        std::string valor;
+private:
+    std::string estado; ///< Objeto primitivo std::string contendo o estado de uma atividade.
 
-    public:
-        inline static const string PENDENTE = "Pendente";
-        inline static const string FAZENDO = "Fazendo";
-        inline static const string CONCLUIDA = "Concluida";
+///
+/// @brief Método privado de validação do estado.
+/// @details Verifica se a string informada pertence à lista de opções válidas.
+/// @param Objeto std::string contendo o texto a ser validado.
+/// @throw std::invalid_argument Lançada se a string informada não for "A FAZER", "FAZENDO" ou "FEITO".
+///
+    void validar(const std::string& estado) const;
 
-        Estado(const string& valorInicial = PENDENTE) : valor(valorInicial) {}
-        void setValor(const string& novoValor){
-            valor = novoValor;
-        }
+public:
 
-        string getValor() const {
-            return valor;
-        }
+    inline static const std::string A_FAZER = "A FAZER";
+    inline static const std::string FAZENDO = "FAZENDO";
+    inline static const std::string FEITO = "FEITO";
 
-        static vector<string> getOpcoes() {
-            return {PENDENTE, FAZENDO, CONCLUIDA};
-        }
+    ///
+    /// @brief Construtor da classe Estado, deve incluir o método de validação do estado.
+    /// @details Inicializa o objeto com o estado "A FAZER" por padrão ou valida o parâmetro informado.
+    /// @param Objeto std::string contendo o estado inicial (padrão: Estado::A_FAZER).
+    /// @throw std::invalid_argument Lançada se o estadoInicial informado for inválido.
+    ///
+    Estado(const std::string& estadoInicial = A_FAZER);
+
+    ///
+    /// @brief Atribui e valida o valor do estado
+    /// @details Invoca o método validar() e, se aprovado, armazena o novo estado.
+    /// @param Objeto std::string contendo o novo estado.
+    /// @throw std::invalid_argument Lançada se o novoEstado for diferente das opções permitidas.
+    ///
+    void setEstado(const std::string& novoEstado);
+
+    ///
+    /// @brief Obtém o valor do estado armazenado
+    /// @return Objeto std::string contendo o estado atual.
+    ///
+    string getEstado() const;
+
+    ///
+    /// @brief Retorna a lista contendo as opções válidas pré-existentes de estado.
+    /// @return Objeto std::vector<std::string> contendo {"A FAZER", "FAZENDO", "FEITO"}.
+    ///
+    static std::vector<std::string> getOpcoes();
 };
 
 //CLASSE NOME AMIGOS TP1
@@ -163,10 +192,11 @@ class Email { //Formato válido: parte-local@dominio
         private:
             static const int LIMLOCAL = 64; 
             static const int LIMDOMINIO = 255; 
-            string email;
+            string email; ///< Objeto primitivo string que armazena o e-mail
 ///
 /// @brief Valida o e-mail e deve ser incluído no método setEmail
-/// @details Analisa se o email informado pelo usuário segue a estrutura parte-local@domínio e respeita as regras permitidas: Pode conter letra (a-z), dígito (0-9) ou ponto(.) ou hífen (-), não pode iniciar ou terminar com ponto ou hífen, ponto ou hifen deve ser seguido de letra(s) ou digito(s)
+/// @details Analisa se o email informado pelo usuário segue a estrutura parte-local@domínio e respeita as regras permitidas: 
+///          Pode conter letra (a-z), dígito (0-9) ou ponto(.) ou hífen (-), não pode iniciar ou terminar com ponto ou hífen, ponto ou hifen deve ser seguido de letra(s) ou digito(s)
 /// @param Recebe string passada por referência
 /// @throw std::invalid_argument Lançada se a string não atender às regras de validação.
 ///
