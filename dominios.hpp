@@ -219,53 +219,6 @@ class Email { //Formato válido: parte-local@dominio
 
 };
 
-inline void Email::validarEmail(string novoEmail){ //Pode conter letra (a-z), dígito (0-9) ou ponto(.) ou hífen (-), não pode iniciar ou terminar com ponto ou hífen, ponto ou hifen deve ser seguido de letra(s) ou digito(s)
-
-	//Divide novoEmail entre as variáveis parteLocal e dominio
-	size_t posArroba = novoEmail.find('@'); //Busca posição de '@' na string
-	
-	if(posArroba == string::npos){ //A função find retorna "npos" se não encontrar o '@'
-		throw invalid_argument("Argumento inválido");
-	}
-	
-	string parteLocal = novoEmail.substr(0, posArroba); //Armazena o caracter da posição '0' até a posição imediatamente anterior ao "@"
-	string dominio = novoEmail.substr(posArroba + 1); //Omitindo o 1º parametro, armazena todos os caracteres da posição indicada até o caracter imediatamente anterior ao '/0'
-	
-	//Testar email conforme critérios estabelecidos nos requisitos não pode iniciar ou terminar com ponto ou hífen, ponto ou hifen deve ser seguido de letra(s) ou digito(s)
-	//Limites
-	if(parteLocal.length() > LIMLOCAL || dominio.length() > LIMDOMINIO){
-		throw invalid_argument("Argumento inválido");
-	}
-	
-    string partesEmail[2] = {parteLocal, dominio}; // O array neste formato permite passar as duas strings ao mesmo tempo pelos testes sem repetir código
-    
-    for(int p = 0; p < 2; p++) {
-       	string str = partesEmail[p];
-        
-        // Verifica se a string está vazia ou inicia/termina com . ou -
-       	if (str.empty() || str.front() == '.' || str.front() == '-' || str.back() == '.' || str.back() == '-') {
-           		throw invalid_argument("Argumento inválido");
-		}
-
-    	//Pode conter letra (a-z), dígito (0-9) ou ponto(.) ou hífen (-)
-    	for(size_t i = 0; i < str.length(); i++){
-       		char c = str[i];
-            
-       		if(!isalnum(c) && c != '.' && c != '-'){
-           		throw invalid_argument("Argumento inválido");
-       		}
-            
-         // Ponto ou hífen seguido de letra ou dígito
-       		if(c == '.' || c == '-'){
-           		char proximo = str[i + 1];
-             		if(!isalnum(proximo)){
-                   			throw invalid_argument("Argumento inválido");
-               		}
-       		}
-    	}
-	}
-}
-
 inline void Email::setEmail(string novoEmail){
 	validarEmail(novoEmail);
 	this->email = novoEmail;
