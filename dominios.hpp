@@ -26,7 +26,7 @@ private:
 /// @param Objeto std::string contendo o texto a ser validado.
 /// @throw std::invalid_argument Lançada se a string informada não for "A FAZER", "FAZENDO" ou "FEITO".
 ///
-    void validar(const std::string& estado) const;
+    void validarEstado(const std::string& estado) const;
 
 public:
 
@@ -37,7 +37,7 @@ public:
     ///
     /// @brief Construtor da classe Estado, deve incluir o método de validação do estado.
     /// @details Inicializa o objeto com o estado "A FAZER" por padrão ou valida o parâmetro informado.
-    /// @param Objeto std::string contendo o estado inicial (padrão: Estado::A_FAZER).
+    /// @param Objeto std::string contendo o estado inicial (padrão: A_FAZER).
     /// @throw std::invalid_argument Lançada se o estadoInicial informado for inválido.
     ///
     Estado(const std::string& estadoInicial = A_FAZER);
@@ -62,6 +62,32 @@ public:
     ///
     static std::vector<std::string> getOpcoes();
 };
+
+inline Estado::Estado(const std::string& estadoInicial) {
+    setEstado(estadoInicial);
+}
+
+inline void Estado::validarEstado(const std::string& estado) const {
+    std::vector<std::string> opcoes = getOpcoes();
+    
+    // Busca se o valor informado está entre as opções permitidas
+    if (std::find(opcoes.begin(), opcoes.end(), valor) == opcoes.end()) {
+        throw std::invalid_argument("Estado invalido: O valor deve ser 'A FAZER', 'FAZENDO' ou 'FEITO'.");
+    }
+}
+
+inline void Estado::setEstado(const std::string& novoEstado) {
+    validarEstado(novoEstado);
+    this->estado = novoEstado;
+}
+
+inline string Estado::getEstado() const {
+    return estado;
+}
+
+inline std::vector<std::string> Estado::getOpcoes() {
+    return {A_FAZER, FAZENDO, FEITO};
+}
 
 //CLASSE NOME AMIGOS TP1
 class Nome {
