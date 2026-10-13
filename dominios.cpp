@@ -5,87 +5,52 @@
 
 
 // Metodos email
-bool Email::eAlfanumerico(char c) const {
-    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
+void Email::validarEmail(string novoEmail){ //Pode conter letra (a-z), dígito (0-9) ou ponto(.) ou hífen (-), não pode iniciar ou terminar com ponto ou hífen, ponto ou hifen deve ser seguido de letra(s) ou digito(s)
+
+	//Divide novoEmail entre as variáveis parteLocal e dominio
+	size_t posArroba = novoEmail.find('@'); //Busca posição de '@' na string
+	
+	if(posArroba == string::npos){ //A função find retorna "npos" se não encontrar o '@'
+		throw invalid_argument("Argumento inválido");
+	}
+	
+	string parteLocal = novoEmail.substr(0, posArroba); //Armazena o caracter da posição '0' até a posição imediatamente anterior ao "@"
+	string dominio = novoEmail.substr(posArroba + 1); //Omitindo o 1º parametro, armazena todos os caracteres da posição indicada até o caracter imediatamente anterior ao '/0'
+	
+	//Testar email conforme critérios estabelecidos nos requisitos não pode iniciar ou terminar com ponto ou hífen, ponto ou hifen deve ser seguido de letra(s) ou digito(s)
+	//Limites
+	if(parteLocal.length() > LIMLOCAL || dominio.length() > LIMDOMINIO){
+		throw invalid_argument("Argumento inválido");
+	}
+	
+    string partesEmail[2] = {parteLocal, dominio}; // O array neste formato permite passar as duas strings ao mesmo tempo pelos testes sem repetir código
+    
+    for(int p = 0; p < 2; p++) {
+       	string str = partesEmail[p];
+        
+        // Verifica se a string está vazia ou inicia/termina com . ou -
+       	if (str.empty() || str.front() == '.' || str.front() == '-' || str.back() == '.' || str.back() == '-') {
+           		throw invalid_argument("Argumento inválido");
+		}
+
+    	//Pode conter letra (a-z), dígito (0-9) ou ponto(.) ou hífen (-)
+    	for(size_t i = 0; i < str.length(); i++){
+       		char c = str[i];
+            
+       		if(!isalnum(c) && c != '.' && c != '-'){
+           		throw invalid_argument("Argumento inválido");
+       		}
+            
+         // Ponto ou hífen seguido de letra ou dígito
+       		if(c == '.' || c == '-'){
+           		char proximo = str[i + 1];
+             		if(!isalnum(proximo)){
+                   			throw invalid_argument("Argumento inválido");
+               		}
+       		}
+    	}
+	}
 }
-
-bool Email::validarParteLocal(const string& local) const {
-    if (local.empty() || local.length() > 64) return false;
-
-    if (!eAlfanumerico(local.front()) || !eAlfanumerico(local.back())) return false;
-
-    for (size_t i = 0; i < local.length(); i++) {
-        char c = local[i];
-
-        if (!eAlfanumerico(c) && c != '.' && c != '-') {
-            return false;
-        }
-
-        if (c == '.' || c == '-') {
-            if (i + 1 >= local.length() || !eAlfanumerico(local[i + 1])) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
-bool Email::validarDominio(const string& dominio) const {
-    if (dominio.empty() || dominio.length() > 255) return false;
-
-    if (dominio.front() == '.' || dominio.front() == '-' ||
-        dominio.back() == '.' || dominio.back() == '-') {
-        return false;
-    }
-
-    size_t inicioParte = 0;
-    while (inicioParte < dominio.length()) {
-        size_t fimParte = dominio.find('.', inicioParte);
-        if (fimParte == string::npos) {
-            fimParte = dominio.length();
-        }
-
-        string parte = dominio.substr(inicioParte, fimParte - inicioParte);
-
-        if (parte.empty()) return false;
-
-        if (parte.front() == '-' || parte.back() == '-') return false;
-
-        for (char c : parte) {
-            if (!eAlfanumerico(c) && c != '-') {
-                return false;
-            }
-        }
-
-        inicioParte = fimParte + 1;
-    }
-
-    return true;
-}
-
-void Email::validar(const string& email) {
-    size_t posicaoArroba = email.find('@');
-
-    if (posicaoArroba == string::npos || email.find('@', posicaoArroba + 1) != string::npos) {
-        throw invalid_argument("Argumento invalido.");
-    }
-
-    string parteLocal = email.substr(0, posicaoArroba);
-    string dominio = email.substr(posicaoArroba + 1);
-
-    if (!validarParteLocal(parteLocal) || !validarDominio(dominio)) {
-        throw invalid_argument("Argumento invalido.");
-    }
-}
-
-void Email::setValor(const string& valor) {
-    validar(valor);
-    this->valor = valor;
-}
-
-string Email::getValor() const {
-    return valor;
-};
 
 
 // Metodos identificador
