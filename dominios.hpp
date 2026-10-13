@@ -155,35 +155,51 @@ class Texto {
         }
 };
 
+///
+/// @brief Domínio Email representa o usuário do sistema: deve ser utilizado no login e relacionado com o papel do usuário e suas permissões.
+/// @details Encapsula o endereço de e-mail no formato parte-local@domínio. A parte local tem até 64 caracteres e o domínio até 255. Deve ser incluído como chave primária da entidade Pessoa
+///
 class Email { //Formato válido: parte-local@dominio
         private:
             static const int LIMLOCAL = 64; 
             static const int LIMDOMINIO = 255; 
-            string parteLocalEmail;
-            string dominioEmail;
+            string email;
+///
+/// @brief Valida o e-mail e deve ser incluído no método setEmail
+/// @details Analisa se o email informado pelo usuário segue a estrutura parte-local@domínio e respeita as regras permitidas: Pode conter letra (a-z), dígito (0-9) ou ponto(.) ou hífen (-), não pode iniciar ou terminar com ponto ou hífen, ponto ou hifen deve ser seguido de letra(s) ou digito(s)
+/// @param Recebe string passada por referência
+/// @throw std::invalid_argument Lançada se a string não atender às regras de validação.
+///
             void validarEmail(string); 
 
         public:
-	    //Construtores precisa??
-            Email();
-            Email(string,string);
-	    //Setters e Getters
+///
+/// @brief Armazena o e-mail a ser cadastrado, só será criado após a validação dos requisitos e se nenhuma exceção for lançada
+/// @details Recebe uma string, invoca o método privado validar() e, se válido, cria o novo email do usuário.
+/// @param Recebe string contendo o e-mail informado pelo usuário
+/// @throw std::invalid_argument Lançada caso o formato do e-mail seja inválido.
+///
             void setEmail(string);
+///
+/// @brief Obtém o e-mail do usuário, deve ser utilizado como método pela entidade Pessoa
+/// @details Retorna uma cópia do objeto string contido no atributo email, não gera qualquer alteração desse objeto.
+/// @return Objeto std::string contendo o endereço de e-mail.
+///
             string getEmail() const;
 
 };
 
 inline void Email::validarEmail(string novoEmail){ //Pode conter letra (a-z), dígito (0-9) ou ponto(.) ou hífen (-), não pode iniciar ou terminar com ponto ou hífen, ponto ou hifen deve ser seguido de letra(s) ou digito(s)
-	string parteLocal;
-	string dominio;
 
 	//Divide novoEmail entre as variáveis parteLocal e dominio
 	size_t posArroba = novoEmail.find('@'); //Busca posição de '@' na string
-	if(posArroba == string::npos){ //A função find retorna "npos" se não encontrar o caracter de busca
+	
+	if(posArroba == string::npos){ //A função find retorna "npos" se não encontrar o '@'
 		throw invalid_argument("Argumento inválido");
 	}
-	parteLocal = novoEmail.substr(0, posArroba); //Armazena o caracter da posição '0' até a posição imediatamente anterior ao "@"
-	dominio = novoEmail.substr(posArroba + 1); //Omitindo o 1º parametro, armazena todos os caracteres da posição indicada até o caracter imediatamente anterior ao '/0'
+	
+	string parteLocal = novoEmail.substr(0, posArroba); //Armazena o caracter da posição '0' até a posição imediatamente anterior ao "@"
+	string dominio = novoEmail.substr(posArroba + 1); //Omitindo o 1º parametro, armazena todos os caracteres da posição indicada até o caracter imediatamente anterior ao '/0'
 	
 	//Testar email conforme critérios estabelecidos nos requisitos não pode iniciar ou terminar com ponto ou hífen, ponto ou hifen deve ser seguido de letra(s) ou digito(s)
 	//Limites
@@ -191,51 +207,41 @@ inline void Email::validarEmail(string novoEmail){ //Pode conter letra (a-z), d�
 		throw invalid_argument("Argumento inválido");
 	}
 	
-    	string partesEmail[2] = {parteLocal, dominio}; // O array neste formato permite passar as duas strings ao mesmo tempo pelos testes sem repetir código
+    string partesEmail[2] = {parteLocal, dominio}; // O array neste formato permite passar as duas strings ao mesmo tempo pelos testes sem repetir código
     
-    	for(int p = 0; p < 2; p++) {
-        	string str = partesEmail[p];
+    for(int p = 0; p < 2; p++) {
+       	string str = partesEmail[p];
         
         // Verifica se a string está vazia ou inicia/termina com . ou -
-        	if (str.empty() || str.front() == '.' || str.front() == '-' || str.back() == '.' || str.back() == '-') {
-            		throw invalid_argument("Argumento inválido");
-        	}
+       	if (str.empty() || str.front() == '.' || str.front() == '-' || str.back() == '.' || str.back() == '-') {
+           		throw invalid_argument("Argumento inválido");
+		}
 
-        //Pode conter letra (a-z), dígito (0-9) ou ponto(.) ou hífen (-)
-        	for(size_t i = 0; i < str.length(); i++){
-            		char c = str[i];
+    	//Pode conter letra (a-z), dígito (0-9) ou ponto(.) ou hífen (-)
+    	for(size_t i = 0; i < str.length(); i++){
+       		char c = str[i];
             
-            		if(!isalnum(c) && c != '.' && c != '-'){
-                		throw invalid_argument("Argumento inválido");
-            		}
+       		if(!isalnum(c) && c != '.' && c != '-'){
+           		throw invalid_argument("Argumento inválido");
+       		}
             
          // Ponto ou hífen seguido de letra ou dígito
-            		if(c == '.' || c == '-'){
-                		char proximo = str[i + 1];
-                		if(!isalnum(proximo)){
-                    			throw invalid_argument("Argumento inválido");
-                		}
-            		}
-        	}
+       		if(c == '.' || c == '-'){
+           		char proximo = str[i + 1];
+             		if(!isalnum(proximo)){
+                   			throw invalid_argument("Argumento inválido");
+               		}
+       		}
+    	}
 	}
 }
 
 inline void Email::setEmail(string novoEmail){
 	validarEmail(novoEmail);
-	
-	string parteLocal;
-	string dominio;
-	
-	size_t posArroba = novoEmail.find('@');
-	parteLocal = novoEmail.substr(0, posArroba);
-	dominio = novoEmail.substr(posArroba + 1);
-	
-	this->parteLocalEmail = parteLocal;
-	this->dominioEmail = dominio;
+	this->email = novoEmail;
 }
 
 inline string Email::getEmail() const{
-	string email = parteLocalEmail + '@' + dominioEmail;
 	return email;
 }	
 
