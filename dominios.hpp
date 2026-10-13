@@ -6,12 +6,13 @@
 #include <cctype>
 #include <iostream>
 #include <stdexcept>
+#include <algorithm>
 
 
-using namespace std;
+using namespace std; //Para seguirmos o Google C++ Style Guide SEMPRE USAR std::string em variáveis e métodos de texto neste arquivo
 
 ///
-/// @brief Representa o domínio Estado de um cartão de atividade Kanban.
+/// @brief Representa o domínio Estado de um cartão de atividade.
 /// @details Garante que o estado seja restrito a uma das três opções pré-existentes: 
 ///          "A FAZER", "FAZENDO" ou "FEITO". 
 ///          Qualquer tentativa de atribuir outro valor resultará em lançamento de exceção.
@@ -35,12 +36,12 @@ public:
     inline static const std::string FEITO = "FEITO";
 
 ///
-/// @brief Construtor da classe Estado, deve incluir o método de validação do estado.
-/// @details Inicializa o objeto com o estado "A FAZER" por padrão ou valida o parâmetro informado.
+/// @brief Construtor da classe Estado, deve ser utilizado na criação de um novo cartão de atividade.
+/// @details Inicializa o objeto com o estado "A FAZER" por padrão.
 /// @param Objeto std::string contendo o estado inicial (padrão: A_FAZER).
 /// @throw std::invalid_argument Lançada se o estadoInicial informado for inválido.
-    ///
-    Estado(const std::string& estadoInicial = A_FAZER);
+///
+    explicit Estado(const std::string& estadoInicial = A_FAZER) { setEstado(estadoInicial); }
 
 ///
 /// @brief Atribui e valida o valor do estado
@@ -54,24 +55,22 @@ public:
 /// @brief Obtém o valor do estado armazenado
 /// @return Objeto std::string contendo o estado atual.
 ///
-    string getEstado() const;
+    std::string getEstado() const{ return estado; }
 
 ///
-/// @brief Retorna a lista contendo as opções válidas pré-existentes de estado.
+/// @brief Retorna lista contendo as opções válidas pré-existentes de estado.
+///		   Alterações na lista devem ser realizadas diretamente nesse método após a modificação dos nomes das variáveis de estado A_FAZER, FAZENDO e FEITO
 /// @return Objeto std::vector<std::string> contendo {"A FAZER", "FAZENDO", "FEITO"}.
 ///
-    static std::vector<std::string> getOpcoes();
+    static std::vector<std::string> getOpcoes() { return {A_FAZER, FAZENDO, FEITO}; }
+
 };
 
-inline Estado::Estado(const std::string& estadoInicial) {
-    setEstado(estadoInicial);
-}
-
-inline void Estado::validarEstado(const std::string& estado) const {
+inline void Estado::validarEstado(const std::string& novoEstado) const {
     std::vector<std::string> opcoes = getOpcoes();
     
     // Busca se o valor informado está entre as opções permitidas
-    if (std::find(opcoes.begin(), opcoes.end(), valor) == opcoes.end()) {
+    if (std::find(opcoes.begin(), opcoes.end(), novoEstado) == opcoes.end()) { //Se find não encontra o elemento procurado, retorna o ponteiro para o final da lista
         throw std::invalid_argument("Estado invalido: O valor deve ser 'A FAZER', 'FAZENDO' ou 'FEITO'.");
     }
 }
@@ -81,20 +80,15 @@ inline void Estado::setEstado(const std::string& novoEstado) {
     this->estado = novoEstado;
 }
 
-inline string Estado::getEstado() const {
-    return estado;
-}
-
-inline std::vector<std::string> Estado::getOpcoes() {
-    return {A_FAZER, FAZENDO, FEITO};
-}
-
-//CLASSE NOME AMIGOS TP1
+///
+/// @brief Representa o domínio Nome a ser utilizado nas 4 entidades (Pessoa, Projeto, Quadro e Cartão de Atividade)
+/// @details Texto de até 15 caracteres composto por letras, números, caracteres especiais e espaços.
+///
 class Nome {
     private:
-        string valor;
+        std::string nome;///< Objeto std::string contendo o texto do nome a ser armazenado.
 
-    bool validar(const string& valorTestar) const {
+    bool validarNome(const string& novoNome) const {
         if (valorTestar.empty() || valorTestar.length() > 15){
             return false;
         }
@@ -212,7 +206,8 @@ class Texto {
 
 ///
 /// @brief Domínio Email representa o usuário do sistema: deve ser utilizado no login e relacionado com o papel do usuário e suas permissões.
-/// @details Encapsula o endereço de e-mail no formato parte-local@domínio. A parte local tem até 64 caracteres e o domínio até 255. Deve ser incluído como chave primária da entidade Pessoa
+/// @details Encapsula o endereço de e-mail no formato parte-local@domínio. A parte local tem até 64 caracteres e o domínio até 255.
+///			 Sugerimos inclusão como chave primária da entidade Pessoa
 ///
 class Email { //Formato válido: parte-local@dominio
         private:
@@ -222,7 +217,8 @@ class Email { //Formato válido: parte-local@dominio
 ///
 /// @brief Valida o e-mail e deve ser incluído no método setEmail
 /// @details Analisa se o email informado pelo usuário segue a estrutura parte-local@domínio e respeita as regras permitidas: 
-///          Pode conter letra (a-z), dígito (0-9) ou ponto(.) ou hífen (-), não pode iniciar ou terminar com ponto ou hífen, ponto ou hifen deve ser seguido de letra(s) ou digito(s)
+///          Pode conter letra (a-z), dígito (0-9) ou ponto(.) ou hífen (-), não pode iniciar ou terminar com ponto ou hífen,
+///			 ponto ou hifen deve ser seguido de letra(s) ou digito(s)
 /// @param Recebe string passada por referência
 /// @throw std::invalid_argument Lançada se a string não atender às regras de validação.
 ///
@@ -230,29 +226,32 @@ class Email { //Formato válido: parte-local@dominio
 
         public:
 ///
+/// @brief Construtor da classe Email, deve ser utilizado na criação de um novo usuário.
+/// @details Inicializa o objeto com o email "parte-local@dominio" por padrão.
+/// @param Objeto std::string contendo o email inicial (padrão: parte-local@dominio).
+/// @throw std::invalid_argument Lançada se o novoEmail informado for inválido.
+///
+			explicit Email(const std::string& novoEmail = "parte-local@dominio") { setEmail(novoEmail) }
+///
 /// @brief Armazena o e-mail a ser cadastrado, só será criado após a validação dos requisitos e se nenhuma exceção for lançada
 /// @details Recebe uma string, invoca o método privado validar() e, se válido, cria o novo email do usuário.
 /// @param Recebe string contendo o e-mail informado pelo usuário
 /// @throw std::invalid_argument Lançada caso o formato do e-mail seja inválido.
 ///
-            void setEmail(string);
+            void setEmail(std::string);
 ///
 /// @brief Obtém o e-mail do usuário, deve ser utilizado como método pela entidade Pessoa
 /// @details Retorna uma cópia do objeto string contido no atributo email, não gera qualquer alteração desse objeto.
 /// @return Objeto std::string contendo o endereço de e-mail.
 ///
-            string getEmail() const;
+            std::string getEmail() const { return email; }
 
 };
 
-inline void Email::setEmail(string novoEmail){
+inline void Email::setEmail(std::string novoEmail){
 	validarEmail(novoEmail);
 	this->email = novoEmail;
 }
-
-inline string Email::getEmail() const{
-	return email;
-}	
 
 
 //CLASSE IDENTIFICADOR
