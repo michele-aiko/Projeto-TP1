@@ -227,54 +227,53 @@ class Tamanho {
 	}
 
 
-//CLASSE TEXTO AMIGOS TP1
+///
+/// @brief Representa um texto de até 30 caracteres
+/// @details Armazena e valida um texto que deve iniciar com letra maiúscula, terminar 
+///			 obrigatoriamente com ponto (.) e não pode conter pontuações consecutivas.
+///
 class Texto {
-    private:
-        string valor;
+		private:
+		    std::string texto; ///< Objeto primitivo std::string contendo o texto validado.
+		
+		    ///
+		    /// @brief Valida o texto segundo as regras de formatação
+		    /// @details Integra todas as checagens de tamanho, maiúscula inicial, ponto final,
+		    ///          caracteres permitidos e proibição de pontuações consecutivas.
+		    /// @param texto Objeto std::string contendo o texto a ser avaliado.
+		    /// @throw std::invalid_argument Lançada se o texto descumprir qualquer regra do domínio.
+		    ///
+		    void validarTexto(const std::string& texto) const;
+		
+		public:
+		    ///
+		    /// @brief Construtor da classe Texto.
+		    /// @details Inicializa o objeto com "Texto valido." por padrão ou valida o parâmetro informado.
+		    /// @param textoInicial Objeto std::string contendo o texto inicial.
+		    /// @throw std::invalid_argument Lançada se textoInicial for inválido.
+		    ///
+		    explicit Texto(const std::string& textoInicial = "Texto valido.") { setTexto(textoInicial); } // Passa pela validação ao criar o objeto
+		
+		    ///
+		    /// @brief Atribui e valida o texto.
+		    /// @param novoTexto Objeto std::string contendo o novo texto a ser armazenado.
+		    /// @throw std::invalid_argument Lançada se novoTexto não atender aos critérios de validação.
+		    ///
+		    void setTexto(const std::string& novoTexto);
+		
+		    ///
+		    /// @brief Obtém o texto armazenado.
+		    /// @return Objeto std::string contendo o texto validado.
+		    ///
+		    std::string getTexto() const { return texto; }
 
-        bool ehPontuacao(char c) const {
-            return (c == ',' || c == ';' || c == '.' || c == ':' || c == '?' || c == '!');
-        }
-
-        bool validar(const string& valorTestar) const {
-            if (valorTestar.empty() || valorTestar.length() > 30){
-                return false;
-            }
-
-            if (!std::isupper(valorTestar.front())){
-                return false;
-            }
-
-            for (size_t i = 0; i < valorTestar.length(); i++){
-                char c = valorTestar[i];
-                if (!std::isalnum(c) && c != ' ' && !ehPontuacao(c)){
-                    return false;
-                }
-
-                if (ehPontuacao(c) && i + 1 < valorTestar.length()){
-                    if (ehPontuacao(valorTestar[i + 1])){
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
-    public:
-        void setValor(const string& novoValor){
-            if (!validar(novoValor)){
-                throw std::invalid_argument("Texto invalido.");
-            }
-            valor = novoValor;
-        }
-
-        Texto(const string& valorInicial = "Texto valido."){
-            setValor(valorInicial);
-        }
-
-        string getValor() const {
-            return valor;
-        }
 };
+
+	inline void Texto::setTexto(const std::string& novoTexto) {
+	    validar(novoTexto); // Se for inválido, lança std::invalid_argument
+	    this->texto = novoTexto;
+	}
+
 
 ///
 /// @brief Domínio Email representa o usuário do sistema: deve ser utilizado no login e relacionado com o papel do usuário e suas permissões.
