@@ -120,35 +120,6 @@ class Nome {
 		
 };
 
-	inline void Nome::validarNome(const std::string& nome) const {
-	    // 1. Verifica se a string é vazia ou excede o limite máximo de 15 caracteres
-	    if (nome.empty() || nome.length() > 15) {
-	        throw std::invalid_argument("Nome invalido: deve conter entre 1 e 15 caracteres.");
-	    }
-	
-	    // 2. Verifica se o primeiro ou o último caractere é um espaço em branco
-	    if (nome.front() == ' ' || nome.back() == ' ') {
-	        throw std::invalid_argument("Nome invalido: nao pode iniciar ou terminar com espaco em branco.");
-	    }
-	
-	    // 3. Percorre cada caractere da string para verificar os tipos de caracteres e regras de espaço
-	    for (std::size_t i = 0; i < nome.length(); ++i) {
-	        char c = nome[i];
-	
-	        // Garante que o caractere seja apenas letra (A-Z, a-z) ou espaço
-	        if (!std::isalpha(static_cast<unsigned char>(c)) && c != ' ') {
-	            throw std::invalid_argument("Nome invalido: deve conter apenas letras e espacos.");
-	        }
-	
-	        // Se for um espaço em branco, verifica se o caractere seguinte é uma letra
-	        if (c == ' ') {
-	            if (!std::isalpha(static_cast<unsigned char>(nome[i + 1]))) {
-	                throw std::invalid_argument("Nome invalido: espaco em branco deve ser seguido por letra.");
-	            }
-	        }
-	    }
-	}
-
 	inline void Nome::setNome(const std::string& novoNome) {
 	    validarNome(novoNome); // Se for inválido, dispara std::invalid_argument
 	    this->nome = novoNome;
