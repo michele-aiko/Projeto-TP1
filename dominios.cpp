@@ -126,34 +126,26 @@ void Email::validarEmail(string novoEmail){ //Pode conter letra (a-z), dígito (
 
 
 // Metodos identificador
-void Identificador::validar(const string& valor) {
-    if (valor.length() != TAMANHO) {
-        throw invalid_argument("Argumento invalido.");
+void Identificador::validarIdentificador(const std::string& identificador) const {
+    // 1. Verificação do tamanho exato (deve ter exatamente 6 caracteres)
+    if (identificador.length() != TAMANHO) {
+        throw std::invalid_argument("Identificador invalido: deve conter exatamente 6 caracteres.");
     }
 
-    for (int i = 0; i < 3; i++) {
-        if (!isalpha(valor[i])) {
-            throw invalid_argument("Argumento invalido.");
+    // 2. Verificação dos 3 primeiros caracteres (devem ser letras A-Z ou a-z)
+    for (std::size_t i = 0; i < 3; ++i) {
+        if (!std::isalpha(static_cast<unsigned char>(identificador[i]))) {
+            throw std::invalid_argument("Identificador invalido: os 3 primeiros caracteres devem ser letras.");
         }
     }
 
-    for (int i = 3; i < 6; i++) {
-        if (!isdigit(valor[i])) {
-            throw invalid_argument("Argumento invalido.");
+    // 3. Verificação dos 3 últimos caracteres (devem ser dígitos 0-9)
+    for (std::size_t i = 3; i < TAMANHO; ++i) {
+        if (!std::isdigit(static_cast<unsigned char>(identificador[i]))) {
+            throw std::invalid_argument("Identificador invalido: os 3 ultimos caracteres devem ser digitos.");
         }
     }
 }
-
-void Identificador::setValor(const string& valor) {
-    validar(valor);
-    this->valor = valor;
-}
-
-string Identificador::getValor() const {
-    return valor;
-};
-
-
 
 // Metodos Limite
 void Limite::validar(int valor) {
