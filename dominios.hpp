@@ -18,120 +18,142 @@ using namespace std; //Para seguirmos o Google C++ Style Guide SEMPRE USAR std::
 ///          Qualquer tentativa de atribuir outro valor resultará em lançamento de exceção.
 ///
 class Estado {
-private:
-    std::string estado; ///< Objeto primitivo std::string contendo o estado de uma atividade.
+	private:
+		std::string estado; ///< Objeto primitivo std::string contendo o estado de uma atividade.
 
-///
-/// @brief Método privado de validação do estado.
-/// @details Verifica se a string informada pertence à lista de opções válidas.
-/// @param Objeto std::string contendo o texto a ser validado.
-/// @throw std::invalid_argument Lançada se a string informada não for "A FAZER", "FAZENDO" ou "FEITO".
-///
-    void validarEstado(const std::string& estado) const;
+	///
+	/// @brief Método privado de validação do estado.
+	/// @details Verifica se a string informada pertence à lista de opções válidas.
+	/// @param estado Objeto std::string contendo o texto a ser validado.
+	/// @throw std::invalid_argument Lançada se a string informada não for "A FAZER", "FAZENDO" ou "FEITO".
+	///
+		void validarEstado(const std::string& estado) const;
+	
+	public:
+	
+		inline static const std::string A_FAZER = "A FAZER";
+		inline static const std::string FAZENDO = "FAZENDO";
+		inline static const std::string FEITO = "FEITO";
 
-public:
-
-    inline static const std::string A_FAZER = "A FAZER";
-    inline static const std::string FAZENDO = "FAZENDO";
-    inline static const std::string FEITO = "FEITO";
-
-///
-/// @brief Construtor da classe Estado, deve ser utilizado na criação de um novo cartão de atividade.
-/// @details Inicializa o objeto com o estado "A FAZER" por padrão.
-/// @param Objeto std::string contendo o estado inicial (padrão: A_FAZER).
-/// @throw std::invalid_argument Lançada se o estadoInicial informado for inválido.
-///
-    explicit Estado(const std::string& estadoInicial = A_FAZER) { setEstado(estadoInicial); }
-
-///
-/// @brief Atribui e valida o valor do estado
-/// @details Invoca o método validar() e, se aprovado, armazena o novo estado.
-/// @param Objeto std::string contendo o novo estado.
-/// @throw std::invalid_argument Lançada se o novoEstado for diferente das opções permitidas.
-///
-    void setEstado(const std::string& novoEstado);
-
-///
-/// @brief Obtém o valor do estado armazenado
-/// @return Objeto std::string contendo o estado atual.
-///
-    std::string getEstado() const{ return estado; }
-
-///
-/// @brief Retorna lista contendo as opções válidas pré-existentes de estado.
-///		   Alterações na lista devem ser realizadas diretamente nesse método após a modificação dos nomes das variáveis de estado A_FAZER, FAZENDO e FEITO
-/// @return Objeto std::vector<std::string> contendo {"A FAZER", "FAZENDO", "FEITO"}.
-///
-    static std::vector<std::string> getOpcoes() { return {A_FAZER, FAZENDO, FEITO}; }
+	///
+	/// @brief Construtor da classe Estado, deve ser utilizado na criação de um novo cartão de atividade.
+	/// @details Inicializa o objeto com o estado "A FAZER" por padrão.
+	/// @param estadoInicial Objeto std::string contendo o estado padrão: A_FAZER.
+	/// @throw std::invalid_argument Lançada se o estadoInicial ou argumento informado for inválido.
+	///
+		explicit Estado(const std::string& estadoInicial = A_FAZER) { setEstado(estadoInicial); }
+	
+	///
+	/// @brief Atribui e valida o valor do estado
+	/// @details Invoca o método validar() e, se aprovado, armazena o novo estado.
+	/// @param novoEstadoObjeto std::string contendo o novo estado.
+	/// @throw std::invalid_argument Lançada se o novoEstado for diferente das opções permitidas.
+	///
+		void setEstado(const std::string& novoEstado);
+	
+	///
+	/// @brief Obtém o valor do estado armazenado
+	/// @return Objeto std::string contendo o estado atual.
+	///
+		std::string getEstado() const{ return estado; }
+	
+	///
+	/// @brief Retorna lista contendo as opções válidas pré-existentes de estado.
+	///		   Alterações na lista devem ser realizadas diretamente nesse método após a modificação dos nomes das variáveis de estado A_FAZER, FAZENDO e FEITO
+	/// @return Objeto std::vector<std::string> contendo {"A FAZER", "FAZENDO", "FEITO"}.
+	///
+		static std::vector<std::string> getOpcoes() { return {A_FAZER, FAZENDO, FEITO}; }
 
 };
 
-inline void Estado::validarEstado(const std::string& novoEstado) const {
-    std::vector<std::string> opcoes = getOpcoes();
-    
-    // Busca se o valor informado está entre as opções permitidas
-    if (std::find(opcoes.begin(), opcoes.end(), novoEstado) == opcoes.end()) { //Se find não encontra o elemento procurado, retorna o ponteiro para o final da lista
-        throw std::invalid_argument("Estado invalido: O valor deve ser 'A FAZER', 'FAZENDO' ou 'FEITO'.");
-    }
-}
+	inline void Estado::validarEstado(const std::string& novoEstado) const {
+	    std::vector<std::string> opcoes = getOpcoes();
+	    
+	    // Busca se o valor informado está entre as opções permitidas
+	    if (std::find(opcoes.begin(), opcoes.end(), novoEstado) == opcoes.end()) { //Se find não encontra o elemento procurado, retorna o ponteiro para o final da lista
+	        throw std::invalid_argument("Estado invalido: O valor deve ser 'A FAZER', 'FAZENDO' ou 'FEITO'.");
+	    }
+	}
 
-inline void Estado::setEstado(const std::string& novoEstado) {
-    validarEstado(novoEstado);
-    this->estado = novoEstado;
-}
+	inline void Estado::setEstado(const std::string& novoEstado) {
+	    validarEstado(novoEstado);
+	    this->estado = novoEstado;
+	}
 
 ///
-/// @brief Representa o domínio Nome a ser utilizado nas 4 entidades (Pessoa, Projeto, Quadro e Cartão de Atividade)
-/// @details Texto de até 15 caracteres composto por letras, números, caracteres especiais e espaços.
+/// @brief Representa o domínio Nome a ser utilizado nas 4 entidades (Pessoa, Projeto, Quadro e Cartão de Atividade).
+/// @details Armazena e valida uma cadeia de texto de 1 a 15 caracteres composta por letras e espaços internos.
 ///
 class Nome {
-    private:
-        std::string nome;///< Objeto std::string contendo o texto do nome a ser armazenado.
-
-    bool validarNome(const string& novoNome) const {
-        if (valorTestar.empty() || valorTestar.length() > 15){
-            return false;
-        }
-
-        if (valorTestar.front() == ' ') {
-            return false;
-        }
-
-        if (valorTestar.back() == ' ') {
-            return false;
-        }
-
-        for (size_t i = 0; i < valorTestar.length(); i++){
-            char c = valorTestar[i];
-            if (!std::isalpha(c) && c != ' ') {
-                return false;
-            }
-
-            if (c == ' ') {
-                if (!std::isalpha(valorTestar[i + 1])){
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-    public:
-        Nome(const std::string& valorInicial = "Nome Padrao"){
-            setValor(valorInicial);
-        }
-
-        void setValor(const std::string& novoValor) {
-            if (!validar(novoValor)) {
-                throw std::invalid_argument("Nome em formato invalido.");
-            }
-            valor = novoValor;
-        }
-
-        string getValor() const {
-            return valor;
-        }
-
+		private:
+		    std::string nome; ///< Objeto primitivo std::string contendo o texto do nome armazenado.
+		
+		    ///
+		    /// @brief Valida a string que representa o nome
+		    /// @details Verifica se a string tem de 1 a 15 caracteres, sem espaços no início ou fim, e se todo espaço é seguido por letra.
+		    /// @param nome Objeto std::string contendo o texto a ser avaliado.
+		    /// @throw std::invalid_argument Lançada se o texto descumprir qualquer regra do domínio Nome.
+		    ///
+		    void validarNome(const std::string& nome) const;
+		
+		public:
+		    ///
+		    /// @brief Construtor da classe Nome.
+		    /// @details Inicializa o objeto com "Nome Padrao" ou com o valor fornecido via parâmetro.
+		    /// @param nomeInicial Objeto std::string contendo o valor inicial do nome.
+		    /// @throw std::invalid_argument Lançada se o nomeInicial ou argumento fornecido for inválido.
+		    ///
+		    explicit Nome(const std::string& nomeInicial = "Nome Padrao") { setNome(nomeInicial); }
+		
+		    ///
+		    /// @brief Atribui e valida o nome.
+		    /// @param novoNOme Objeto std::string contendo o texto a ser armazenado.
+		    /// @throw std::invalid_argument Lançada se novoValor não atender aos critérios de validação.
+		    ///
+		    void setNome(const std::string& novoNome);
+		
+		    ///
+		    /// @brief Obtém o nome armazenado.
+		    /// @return Objeto std::string contendo o nome validado.
+		    ///
+		    std::string getNome() const { return nome; }
+		
 };
+
+	inline void Nome::validarNome(const std::string& nome) const {
+	    // 1. Verifica se a string é vazia ou excede o limite máximo de 15 caracteres
+	    if (nome.empty() || nome.length() > 15) {
+	        throw std::invalid_argument("Nome invalido: deve conter entre 1 e 15 caracteres.");
+	    }
+	
+	    // 2. Verifica se o primeiro ou o último caractere é um espaço em branco
+	    if (nome.front() == ' ' || nome.back() == ' ') {
+	        throw std::invalid_argument("Nome invalido: nao pode iniciar ou terminar com espaco em branco.");
+	    }
+	
+	    // 3. Percorre cada caractere da string para verificar os tipos de caracteres e regras de espaço
+	    for (std::size_t i = 0; i < nome.length(); ++i) {
+	        char c = nome[i];
+	
+	        // Garante que o caractere seja apenas letra (A-Z, a-z) ou espaço
+	        if (!std::isalpha(static_cast<unsigned char>(c)) && c != ' ') {
+	            throw std::invalid_argument("Nome invalido: deve conter apenas letras e espacos.");
+	        }
+	
+	        // Se for um espaço em branco, verifica se o caractere seguinte é uma letra
+	        if (c == ' ') {
+	            if (!std::isalpha(static_cast<unsigned char>(nome[i + 1]))) {
+	                throw std::invalid_argument("Nome invalido: espaco em branco deve ser seguido por letra.");
+	            }
+	        }
+	    }
+	}
+
+	inline void Nome::setNome(const std::string& novoNome) {
+	    validarNome(novoNome); // Se for inválido, dispara std::invalid_argument
+	    this->nome = novoNome;
+	}
+
 //CLASSE TAMANHO AMIGOS TP1
 class Tamanho {
     private:
@@ -230,7 +252,7 @@ class Email { //Formato válido: parte-local@dominio
 /// @details Inicializa o objeto com o email "parte-local@dominio" por padrão.
 /// @param Objeto std::string contendo o email inicial (padrão: parte-local@dominio).
 /// @throw std::invalid_argument Lançada se o novoEmail informado for inválido.
-///
+///			
 			explicit Email(const std::string& novoEmail = "parte-local@dominio") { setEmail(novoEmail) }
 ///
 /// @brief Armazena o e-mail a ser cadastrado, só será criado após a validação dos requisitos e se nenhuma exceção for lançada
