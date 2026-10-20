@@ -3,6 +3,78 @@
 #include <sstream>
 #include <stdexcept>
 
+//Metodos texto
+void Texto::validar(const std::string& valor) const {
+    // 1. Verificação de tamanho (de 1 a 30 caracteres)
+    if (valor.empty() || valor.length() > 30) {
+        throw std::invalid_argument("Texto invalido: deve conter entre 1 e 30 caracteres.");
+    }
+
+    // 2. Primeiro caractere deve ser letra maiúscula (A-Z)
+    if (!std::isupper(static_cast<unsigned char>(valor.front()))) {
+        throw std::invalid_argument("Texto invalido: o primeiro caractere deve ser letra maiuscula.");
+    }
+
+    // 3. Último caractere deve ser obrigatoriamente um ponto (.)
+    if (valor.back() != '.') {
+        throw std::invalid_argument("Texto invalido: o ultimo caractere deve ser um ponto (.).");
+    }
+
+    // 4. Inspeção caractere a caractere
+    for (std::size_t i = 0; i < valor.length(); ++i) {
+        char c = valor[i];
+
+        // Avalia se o caractere atual é um dos sinais de pontuação permitidos
+        bool ehPontuacao = (c == ',' || c == ';' || c == '.' || c == ':' || c == '?' || c == '!');
+
+        // Garante que o caractere seja apenas letra, dígito, espaço ou pontuação permitida
+        if (!std::isalnum(static_cast<unsigned char>(c)) && c != ' ' && !ehPontuacao) {
+            throw std::invalid_argument("Texto invalido: contem caractere nao permitido.");
+        }
+
+        // Verifica se uma pontuação é seguida por outra pontuação consecutiva
+        if (ehPontuacao && (i + 1 < valor.length())) {
+            char proximo = valor[i + 1];
+            bool proximoEhPontuacao = (proximo == ',' || proximo == ';' || proximo == '.' || 
+                                       proximo == ':' || proximo == '?' || proximo == '!');
+            
+            if (proximoEhPontuacao) {
+                throw std::invalid_argument("Texto invalido: um sinal de pontuacao nao pode ser seguido por outro.");
+            }
+        }
+    }
+}
+
+//Metodos nome
+void Nome::validarNome(const std::string& nome) const {
+	// 1. Verifica se a string é vazia ou excede o limite máximo de 15 caracteres
+	if (nome.empty() || nome.length() > 15) {
+		throw std::invalid_argument("Nome invalido: deve conter entre 1 e 15 caracteres.");
+	}
+
+	// 2. Verifica se o primeiro ou o último caractere é um espaço em branco
+	if (nome.front() == ' ' || nome.back() == ' ') {
+		throw std::invalid_argument("Nome invalido: nao pode iniciar ou terminar com espaco em branco.");
+	}
+
+	// 3. Percorre cada caractere da string para verificar os tipos de caracteres e regras de espaço
+	for (std::size_t i = 0; i < nome.length(); ++i) {
+		char c = nome[i];
+
+		// Garante que o caractere seja apenas letra (A-Z, a-z) ou espaço
+		if (!std::isalpha(static_cast<unsigned char>(c)) && c != ' ') {
+			throw std::invalid_argument("Nome invalido: deve conter apenas letras e espacos.");
+		}
+
+		// Se for um espaço em branco, verifica se o caractere seguinte é uma letra
+		if (c == ' ') {
+			if (!std::isalpha(static_cast<unsigned char>(nome[i + 1]))) {
+				throw std::invalid_argument("Nome invalido: espaco em branco deve ser seguido por letra.");
+			}
+		}
+	}
+}
+
 
 // Metodos email
 void Email::validarEmail(string novoEmail){ //Pode conter letra (a-z), dígito (0-9) ou ponto(.) ou hífen (-), não pode iniciar ou terminar com ponto ou hífen, ponto ou hifen deve ser seguido de letra(s) ou digito(s)
