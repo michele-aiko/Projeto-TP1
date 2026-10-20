@@ -12,7 +12,7 @@
 using namespace std; //Para seguirmos o Google C++ Style Guide SEMPRE USAR std::string em variáveis e métodos de texto neste arquivo
 
 ///
-/// @brief Representa o domínio Estado de um cartão de atividade.
+/// @brief Representa o domínio Estado, podendo ser utilizado para controle do andamento de uma atividade.
 /// @details Garante que o estado seja restrito a uma das três opções pré-existentes: 
 ///          "A FAZER", "FAZENDO" ou "FEITO". 
 ///          Qualquer tentativa de atribuir outro valor resultará em lançamento de exceção.
@@ -126,10 +126,9 @@ class Nome {
 	}
 
 ///
-/// @brief Representa o domínio Tamanho, sugestão de uso no cartão de atividades tipo Kanban.
-/// @details Limita o tamanho estimado das tarefas as opções pré-definidas:
-///          "PEQUENO", "MEDIO" ou "GRANDE". Qualquer tentativa de atribuir um valor fora 
-///          desta lista resultará no lançamento de exceção.
+/// @brief Representa o domínio Tamanho, sugestão de uso no cartão de atividades tipo Kanban indicando a estimativa de porte da tarefa.
+/// @details Limita o tamanho estimado das tarefas as opções pré-definidas: "PEQUENO", "MEDIO" ou "GRANDE".
+///		     Qualquer tentativa de atribuir um valor fora desta lista resultará no lançamento de exceção.
 ///
 class Tamanho {
 		private:
@@ -200,7 +199,7 @@ class Tamanho {
 
 ///
 /// @brief Representa um texto de até 30 caracteres
-/// @details Armazena e valida um texto que deve iniciar com letra maiúscula, terminar 
+/// @details Armazena e valida texto que deve iniciar com letra maiúscula, terminar 
 ///			 obrigatoriamente com ponto (.) e não pode conter pontuações consecutivas.
 ///
 class Texto {
@@ -273,7 +272,7 @@ class Email { //Formato válido: parte-local@dominio
 /// @param Objeto std::string contendo o email inicial (padrão: parte-local@dominio).
 /// @throw std::invalid_argument Lançada se o novoEmail informado for inválido.
 ///			
-			explicit Email(const std::string& novoEmail = "parte-local@dominio") { setEmail(novoEmail) }
+			explicit Email(const std::string& novoEmail = "parte-local@dominio") { setEmail(novoEmail); }
 ///
 /// @brief Armazena o e-mail a ser cadastrado, só será criado após a validação dos requisitos e se nenhuma exceção for lançada
 /// @details Recebe uma string, invoca o método privado validar() e, se válido, cria o novo email do usuário.
@@ -295,19 +294,53 @@ inline void Email::setEmail(std::string novoEmail){
 	this->email = novoEmail;
 }
 
-
-//CLASSE IDENTIFICADOR
+///
+/// @brief Representa o domínio Identificador, pode ser usado como chave-primária de projetos e quadros de atividades, por exemplo.
+/// @details Armazena e valida um código identificador único composto por 6 caracteres:
+///          os 3 primeiros devem ser letras (A-Z ou a-z) e os 3 últimos devem ser dígitos (0-9).
+///          Exemplo de valor válido: "ABC123".
+///
 class Identificador {
-private:
-    static const int TAMANHO = 6;
-    string valor;
-    void validar(const string& valor);
-
-public:
-    void setValor(const string& valor);
-    string getValor() const;
+		private:
+		    static const std::size_t TAMANHO = 6; ///< Tamanho máximo para o código identificador.
+		    std::string identificador;            ///< Objeto primitivo std::string contendo o código validado.
+		
+		    ///
+		    /// @brief Valida o formato do identificador quanto ao seu limite e formato.
+		    /// @details Avalia se a string possui 6 caracteres, sendo 3 letras seguidas de 3 dígitos.
+		    /// @param identificador Objeto std::string contendo o código a ser avaliado.
+		    /// @throw std::invalid_argument Lançada se o código descumprir as regras de formato.
+		    ///
+		    void validarIdentificador(const std::string& identificador) const;
+		
+		public:
+		    ///
+		    /// @brief Construtor da classe Identificador.
+		    /// @details Inicializa o objeto com o código padrão "ABC123" ou valida o argumento informado.
+		    /// @param identificadorInicial Objeto std::string contendo o código inicial.
+		    /// @throw std::invalid_argument Lançada se identificadorInicial for inválido.
+		    ///
+		    explicit Identificador(const std::string& identificadorInicial = "ABC123") { setIdentificador(identificadorInicial); }
+		
+		    ///
+		    /// @brief Atribui e valida o identificador.
+		    /// @details Valida o identificador informado como argumento, se aprovado, armazena o novo valor.
+		    /// @param novoIdentificador Objeto std::string contendo o novo código identificador.
+		    /// @throw std::invalid_argument Lançada se novoIdentificador for inválido.
+		    ///
+		    void setIdentificador(const std::string& novoIdentificador);
+		
+		    ///
+		    /// @brief Obtém o identificador armazenado.
+		    /// @return Objeto std::string contendo o código validado.
+		    ///
+		    std::string getIdentificador() const { return identificador; }
 };
 
+inline void Identificador::setIdentificador(const std::string& novoIdentificador) {
+		        validarIdentificador(novoIdentificador); // Garante a execução das regras antes da atribuição
+		        this->identificador = novoIdentificador;
+		    }
 
 //classe limite(?)
 class Limite {
