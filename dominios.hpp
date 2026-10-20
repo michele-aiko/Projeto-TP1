@@ -154,29 +154,79 @@ class Nome {
 	    this->nome = novoNome;
 	}
 
-//CLASSE TAMANHO AMIGOS TP1
+///
+/// @brief Representa o domínio Tamanho, sugestão de uso no cartão de atividades tipo Kanban.
+/// @details Limita o tamanho estimado das tarefas as opções pré-definidas:
+///          "PEQUENO", "MEDIO" ou "GRANDE". Qualquer tentativa de atribuir um valor fora 
+///          desta lista resultará no lançamento de exceção.
+///
 class Tamanho {
-    private:
-        std::string valor;
-
-    public:
-        inline static const string PEQUENO = "Pequeno";
-        inline static const string MEDIO = "Medio";
-        inline static const string GRANDE = "Grande";
-
-        Tamanho(const string& valorInicial = PEQUENO) : valor(valorInicial) {}
-        void setValor(const string& novoValor){
-            valor = novoValor;
-        }
-
-        string getValor() const {
-            return valor;
-        }
-
-        static vector<string> getOpcoes() {
-            return {PEQUENO, MEDIO, GRANDE};
-        }
+		private:
+		    std::string tamanho; ///< Objeto primitivo std::string contendo o tamanho validado.
+		
+		    ///
+		    /// @brief Valida se o tamanho informado pertence à lista de opções permitidas.
+		    /// @details Percorre o vetor retornado por getOpcoes() e verifica se a string informada é válida.
+		    /// @param tamanho Objeto std::string contendo o texto do tamanho a ser validado.
+		    /// @throw std::invalid_argument Lançada se o texto for diferente de "PEQUENO", "MEDIO" ou "GRANDE".
+		    ///
+		    void validarTamanho(const std::string& tamanho) const;
+		
+		public:
+		    /// @brief Constante estática pública representando o tamanho PEQUENO.
+		    inline static const std::string PEQUENO = "PEQUENO";
+		
+		    /// @brief Constante estática pública representando o tamanho MEDIO.
+		    inline static const std::string MEDIO = "MEDIO";
+		
+		    /// @brief Constante estática pública representando o tamanho GRANDE.
+		    inline static const std::string GRANDE = "GRANDE";
+		
+		    ///
+		    /// @brief Construtor da classe Tamanho.
+		    /// @details Inicializa o objeto com "PEQUENO" por padrão ou valida o parâmetro informado.
+		    /// @param tamanhoInicial Objeto std::string contendo o tamanho inicial.
+		    /// @throw std::invalid_argument Lançada se tamanhoInicial for inválido.
+		    ///
+		    explicit Tamanho(const std::string& tamanhoInicial = PEQUENO) { setTamanho(tamanhoInicial); } // Garante que a validação seja executada na criação do objeto
+		
+		    ///
+		    /// @brief Atribui e valida o tamanho da atividade.
+		    /// @details Executa a validação e, em caso de sucesso, armazena o novo valor.
+		    /// @param novoTamanho Objeto std::string contendo o novo tamanho.
+		    /// @throw std::invalid_argument Lançada se novoTamanho não pertencer às opções permitidas.
+		    ///
+		    void setTamanho(const std::string& novoTamanho);
+		
+		    ///
+		    /// @brief Obtém o tamanho armazenado.
+		    /// @return Objeto std::string contendo o tamanho validado.
+		    ///
+		    std::string getTamanho() const { return tamanho; }
+		
+		    ///
+		    /// @brief Retorna a lista contendo as opções válidas pré-existentes.
+			/// @details Alterações na lista devem ser realizadas diretamente nesse método após a modificação dos nomes das variáveis de tamanho: PEQUENO, MEDIO, GRANDE
+		    /// @return Objeto std::vector<std::string> contendo {"PEQUENO", "MEDIO", "GRANDE"}.
+		    ///
+		    static std::vector<std::string> getOpcoes()  { return {PEQUENO, MEDIO, GRANDE}; }
 };
+
+	inline void Tamanho::validarTamanho(const std::string& tamanho) const {
+	    std::vector<std::string> opcoes = getOpcoes();
+	
+	    // Busca se o valor informado está presente no vetor de opções permitidas
+	    if (std::find(opcoes.begin(), opcoes.end(), tamanho) == opcoes.end()) {
+	        throw std::invalid_argument("Tamanho invalido: O valor deve ser 'PEQUENO', 'MEDIO' ou 'GRANDE'.");
+    	}
+	}
+
+	inline void Tamanho::setTamanho(const std::string& novoTamanho) {
+    	validarTamanho(novoTamanho); // Se for inválido, lança std::invalid_argument
+    	this->tamanho = novoTamanho;
+	}
+
+
 //CLASSE TEXTO AMIGOS TP1
 class Texto {
     private:
