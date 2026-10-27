@@ -342,16 +342,56 @@ inline void Identificador::setIdentificador(const std::string& novoIdentificador
 		        this->identificador = novoIdentificador;
 		    }
 
-//classe limite(?)
+
+///
+/// @brief Representa o Limite de WIP (Work in Progress) de quadros de gestão de projetos .
+/// @details Armazena e valida a quantidade máxima de cartões de atividades simultâneos
+///          permitidos na coluna FAZENDO. O valor deve ser obrigatoriamente um número inteiro
+///          na faixa de 1 a 25.
+///
 class Limite {
 private:
-    int valor;
-    void validar(int valor);
+    static const int LIMITE_MINIMO = 1;  ///< Menor valor permitido para o limite de WIP.
+    static const int LIMITE_MAXIMO = 25; ///< Maior valor permitido para o limite de WIP.
+    int limite;                           ///< Atributo primitivo inteiro que armazena o limite validado.
+
+    ///
+    /// @brief Valida se o número inteiro fornecido está dentro da faixa permitida (1 a 25).
+    /// @details Avalia se o parâmetro atende aos limites mínimo e máximo estipulados no TP1.
+    /// @param limite Tipo primitivo int representando o valor numérico a ser testado.
+    /// @throw std::invalid_argument Lançada se o inteiro for menor que 1 ou maior que 25.
+    ///
+    void validar(int limite) const;
 
 public:
-    void setValor(int valor);
-    int getValor() const;
+    ///
+    /// @brief Construtor da classe Limite
+    /// @details Inicializa o objeto com o valor padrão 5 ou valida o inteiro informado.
+    /// @param valorInicial Tipo primitivo int contendo o limite desejado (padrão: 5).
+    /// @throw std::invalid_argument Lançada se valorInicial for menor que 1 ou maior que 25.
+    ///
+    explicit Limite(int valorInicial = 5) { setValor(valorInicial); }
+
+    ///
+    /// @brief Atribui e valida a quantidade limite de WIP
+    /// @details Chame a função privada validar() e, se aprovada, armazena o novo limite no atributo privado.
+    /// @param novoValor Tipo primitivo int contendo o novo valor limite.
+    /// @throw std::invalid_argument Lançada se novoValor estiver fora da faixa de 1 a 25.
+    ///
+    void setLimite(int novoValor) {
+        validar(novoValor); // Garante a validação antes da atribuição
+        this->limite = novoValor;
+    }
+
+    ///
+    /// @brief Obtém o valor limite configurado (Implementação Inline - Padrão TP1).
+    /// @return Tipo primitivo int contendo a quantidade limite armazenada.
+    ///
+    int getLimite() const {
+        return limite;
+    }
 };
+
 
 
 //papel dos usuarios
