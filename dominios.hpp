@@ -66,7 +66,7 @@ class Estado {
 
 };
 
-	inline void Estado::validarEstado(const std::string& novoEstado) const {
+	inline void Estado::validar(const std::string& novoEstado) const {
 	    std::vector<std::string> opcoes = getOpcoes();
 	    
 	    // Busca se o valor informado está entre as opções permitidas
@@ -432,16 +432,16 @@ class Papel {
 		/// @param novoValor Objeto std::string contendo o novo papel. 
 		/// @throw std::invalid_argument Lançada se o novoValor for inválido. 
 		/// 
-		void setValor(const std::string& novoValor) { 
+		void setPapel(const std::string& novoValor) { 
 			validar(novoValor); // Valida antes de persistir na memória 
-			this->valor = novoValor; 
+			this->papel = novoValor; 
 		} 
 
 		/// 
 		/// @brief Obtém o papel armazenado para a pessoa parte de um projeto
 		/// @return Objeto std::string contendo o papel validado ("GESTOR" ou "DESENVOLVEDOR"). 
 		/// 
-		std::string getValor() const { return valor; } 
+		std::string getPapel() const { return papel; } 
 		/// 
 		/// 
 		/// @brief Retorna um vetor contendo a lista com todas as opções válidas. 
@@ -631,7 +631,7 @@ public:
     /// @brief Obtém o timestamp armazenado
     /// @return Objeto std::string contendo o carimbo de data e hora validado.
     ///
-    std::string getTImeStamp() const {
+    std::string getTimeStamp() const {
         return timestamp;
     }
 };
