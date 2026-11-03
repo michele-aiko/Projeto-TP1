@@ -254,8 +254,8 @@ bool ContainerDados::obterQuadroDoCartao(const Identificador& idCartao, Identifi
     auto it = vinculoCartaoQuadro.find(chave);
 
     if (it != vinculoCartaoQuadro.end()) {
-        // Atribui usando o método exclusivo setCodigo
-        idQuadro.setCodigo(it->second);
+    
+        idQuadro.setIdentificador(it->second);
         return true;
     }
     return false;
