@@ -206,80 +206,102 @@ void Senha::validar(const std::string& senha) const {
 
 
 // Metodos timestamp
-
 bool Timestamp::ehBissexto(int ano) const {
-    return (ano % 4 == 0 && ano % 100 != 0) || (ano % 400 == 0);
+    // Um ano é bissexto se é divisível por 4 e não por 100, ou se é divisível por 400
+    return ((ano % 4 == 0 && ano % 100 != 0) || (ano % 400 == 0));
 }
 
-int Timestamp::obterDiasNoMes(const string& mes, int ano) const {
-    if (mes == "JAN") return 31;
-    if (mes == "FEV") return ehBissexto(ano) ? 29 : 28;
-    if (mes == "MAR") return 31;
-    if (mes == "ABR") return 30;
-    if (mes == "MAI") return 31;
-    if (mes == "JUN") return 30;
-    if (mes == "JUL") return 31;
-    if (mes == "AGO") return 31;
-    if (mes == "SET") return 30;
-    if (mes == "OUT") return 31;
-    if (mes == "NOV") return 30;
-    if (mes == "DEZ") return 31;
-    return 0;
+int Timestamp::obterDiasNoMes(const std::string& mes, int ano) const {
+    if (mes == "JAN" || mes == "MAR" || mes == "MAI" || mes == "JUL" ||
+        mes == "AGO" || mes == "OUT" || mes == "DEZ") {
+        return 31;
+    }
+    if (mes == "ABR" || mes == "JUN" || mes == "SET" || mes == "NOV") {
+        return 30;
+    }
+    if (mes == "FEV") {
+        return ehBissexto(ano) ? 29 : 28;
+    }
+    return 0; // Mês inválido
 }
 
-void Timestamp::validar(const string& valor) {
-    stringstream ss(valor);
-    string sDia, mes, sAno, horario;
-
-    if (!getline(ss, sDia, '-') ||
-        !getline(ss, mes, '-') ||
-        !getline(ss, sAno, '-') ||
-        !getline(ss, horario)) {
-        throw invalid_argument("Argumento invalido.");
+void Timestamp::validar(const std::string& timestamp) const {
+    // Formato esperado: "DD-MES-AAAA-HH:MM" (16 caracteres) ou "D-MES-AAAA-HH:MM" (15 caracteres)
+    if (timestamp.length() < 15 || timestamp.length() > 16) {
+        throw std::invalid_argument("Timestamp invalido: tamanho incorreto.");
     }
 
-    // Verifica se sobrou algum trecho na string
-    if (ss.rdbuf()->in_avail() > 0) {
-        throw invalid_argument("Argumento invalido.");
+    // 1. Extração da parte do DIA (antes do primeiro hífen)
+    std::size_t primeiroHifen = timestamp.find('-');
+    if (primeiroHifen == std::string::npos || primeiroHifen < 1 || primeiroHifen > 2) {
+        throw std::invalid_argument("Timestamp invalido: delimitador do dia incorreto.");
+    }
+    std::string strDia = timestamp.substr(0, primeiroHifen);
+
+    // 2. Extração da parte do MÊS (entre o primeiro e o segundo hífen)
+    std::size_t segundoHifen = timestamp.find('-', primeiroHifen + 1);
+    if (segundoHifen == std::string::npos) {
+        throw std::invalid_argument("Timestamp invalido: delimitador do mes incorreto.");
+    }
+    std::string strMes = timestamp.substr(primeiroHifen + 1, segundoHifen - (primeiroHifen + 1));
+    if (strMes.length() != 3) {
+        throw std::invalid_argument("Timestamp invalido: a sigla do mes deve conter exatamente 3 letras.");
     }
 
-    int dia;
-    try {
-        dia = stoi(sDia);
-    } catch (...) {
-        throw invalid_argument("Argumento invalido.");
+    // 3. Extração da parte do ANO (entre o segundo e o terceiro hífen)
+    std::size_t terceiroHifen = timestamp.find('-', segundoHifen + 1);
+    if (terceiroHifen == std::string::npos) {
+        throw std::invalid_argument("Timestamp invalido: delimitador do ano incorreto.");
+    }
+    std::string strAno = timestamp.substr(segundoHifen + 1, terceiroHifen - (segundoHifen + 1));
+    if (strAno.length() != 4) {
+        throw std::invalid_argument("Timestamp invalido: o ano deve conter exatamente 4 digitos.");
     }
 
-    int ano;
-    try {
-        ano = stoi(sAno);
-    } catch (...) {
-        throw invalid_argument("Argumento invalido.");
+    // 4. Extração da parte do HORÁRIO (após o terceiro hífen)
+    std::string strHorario = timestamp.substr(terceiroHifen + 1);
+    if (strHorario.length() != 5 || strHorario != ':') {
+        throw std::invalid_argument("Timestamp invalido: horario deve estar no formato HH:MM.");
     }
+    std::string strHora = strHorario.substr(0, 2);
+    std::string strMinuto = strHorario.substr(3, 2);
+
+    // 5. Validação de dígitos numéricos
+    auto contemApenasDigitos = [](const std::string& s) {
+        for (char c : s) {
+            if (!std::isdigit(static_cast<unsigned char>(c))) return false;
+        }
+        return true;
+    };
+
+    if (!contemApenasDigitos(strDia) || !contemApenasDigitos(strAno) ||
+        !contemApenasDigitos(strHora) || !contemApenasDigitos(strMinuto)) {
+        throw std::invalid_argument("Timestamp invalido: dia, ano, hora e minuto devem ser compostos por digitos.");
+    }
+
+    // Conversão de strings para inteiros
+    int dia = std::stoi(strDia);
+    int ano = std::stoi(strAno);
+    int hora = std::stoi(strHora);
+    int minuto = std::stoi(strMinuto);
+
+    // 6. Validação do ANO (2000 a 2099)
     if (ano < 2000 || ano > 2099) {
-        throw invalid_argument("Argumento invalido.");
+        throw std::invalid_argument("Timestamp invalido: o ano deve estar entre 2000 e 2099.");
     }
 
-    // Validar MÊS e DIA conforme quantidade de dias no mês
-    int maxDias = obterDiasNoMes(mes, ano);
-    if (maxDias == 0 || dia < 1 || dia > maxDias) {
-        throw invalid_argument("Argumento invalido.");
+    // 7. Validação do MÊS e do DIA considerando bissextos
+    int maxDias = obterDiasNoMes(strMes, ano);
+    if (maxDias == 0) {
+        throw std::invalid_argument("Timestamp invalido: sigla do mes nao reconhecida.");
+    }
+    if (dia < 1 || dia > maxDias) {
+        throw std::invalid_argument("Timestamp invalido: dia incompativel com o mes e ano informados.");
     }
 
-    // Validar HORÁRIO (Formato HH:MM)
-    if (horario.length() != 5 || horario[2] != ':') {
-        throw invalid_argument("Argumento invalido.");
-    }
-
-    int hora, minuto;
-    try {
-        hora = stoi(horario.substr(0, 2));
-        minuto = stoi(horario.substr(3, 2));
-    } catch (...) {
-        throw invalid_argument("Argumento invalido.");
-    }
-
+    // 8. Validação do HORÁRIO (00:00 a 23:59)
     if (hora < 0 || hora > 23 || minuto < 0 || minuto > 59) {
-        throw invalid_argument("Argumento invalido.");
+        throw std::invalid_argument("Timestamp invalido: horario fora da faixa permitida (00:00 a 23:59).");
     }
 }
+
