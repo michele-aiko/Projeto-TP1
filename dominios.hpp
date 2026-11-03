@@ -519,21 +519,58 @@ public:
     }
 };
 
-
-//classe das senhas
+///
+/// @brief Representa o domínio Senha de acesso do usuário no sistema Kanban.
+/// @details Armazena e valida uma senha com comprimento exato de 5 caracteres alfanuméricos
+///          (letras 'a'-'z', 'A'-'Z' e dígitos '0'-'9'), contendo obrigatoriamente ao menos uma
+///          letra e ao menos um dígito.
+///
 class Senha {
 private:
-    static const int TAMANHO = 5;
-    string valor;
-    void validar(const string& valor);
+    static const std::size_t TAMANHO = 5; ///< Comprimento exato exigido para a senha.
+    std::string senha;                    ///< Objeto std::string contendo a senha validada.
+
+    ///
+    /// @brief Valida se a senha atende a todas as restrições do TP1.
+    /// @details Avalia o comprimento exato (5 caracteres), restrição a alfanuméricos e
+    ///          a presença obrigatória de pelo menos uma letra e um dígito.
+    /// @param senha Objeto std::string contendo a senha a ser auditada.
+    /// @throw std::invalid_argument Lançada se a senha descumprir qualquer regra do domínio.
+    ///
+    void validar(const std::string& senha) const;
 
 public:
-    void setValor(const string& valor);
-    string getValor() const;
+    ///
+    /// @brief Construtor da classe Senha
+    /// @details Inicializa o objeto com uma senha padrão válida ("A1b2c") ou valida o parâmetro fornecido.
+    /// @param valorInicial Objeto std::string contendo a senha inicial desejada (padrão: "A1b2c").
+    /// @throw std::invalid_argument Lançada se valorInicial não atender às regras de validação.
+    ///
+    explicit Senha(const std::string& valorInicial = "A1b2c") {
+        setSenha(valorInicial);
+    }
+
+    ///
+    /// @brief Atribui e valida a senha de acesso
+    /// @details Invoca o método privado validar() e, se aceito, armazena a nova senha.
+    /// @param novoValor Objeto std::string contendo a nova senha.
+    /// @throw std::invalid_argument Lançada se novoValor for inválido.
+    ///
+    void setSenha(const std::string& novoValor) {
+        validar(novoValor); // Valida antes de persistir na memória
+        this->senha = novoValor;
+    }
+
+    ///
+    /// @brief Obtém a senha armazenada
+    /// @return Objeto std::string contendo a senha validada.
+    ///
+    std::string getSenha() const {
+        return senha;
+    }
 };
 
 
-//classe da data, mais dificil
 class Timestamp {
 private:
     string valor;
