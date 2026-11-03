@@ -32,52 +32,17 @@ public:
     ///
     Pessoa(const Email& email, const Nome& nome, const Senha& senha, const Papel& papel);
 
-    ///
-    /// @brief Atribui o e-mail da pessoa
-    /// @param email Objeto da classe de domínio Email.
-    ///
-    void setEmail(const Email& email) { this->email = email; }
 
-    ///
-    /// @brief Obtém o e-mail da pessoa 
-    /// @return Objeto da classe de domínio Email.
-    ///
+    void setEmail(const Email& email) { this->email = email; }
     Email getEmail() const { return email; }
 
-    ///
-    /// @brief Atribui o nome da pessoa 
-    /// @param nome Objeto da classe de domínio Nome.
-    ///
     void setNome(const Nome& nome) { this->nome = nome; }
-
-    ///
-    /// @brief Obtém o nome da pessoa
-    /// @return Objeto da classe de domínio Nome.
-    ///
     Nome getNome() const { return nome; }
 
-    ///
-    /// @brief Atribui a senha da pessoa
-    /// @param senha Objeto da classe de domínio Senha.
-    ///
     void setSenha(const Senha& senha) { this->senha = senha; }
-
-    ///
-    /// @brief Obtém a senha da pessoa
-    /// @return Objeto da classe de domínio Senha.
-    ///
     Senha getSenha() const { return senha; }
 
-    ///
-    /// @brief Atribui o papel funcional da pessoa .
-    /// @param papel Objeto da classe de domínio Papel.
-    ///
     void setPapel(const Papel& papel) { this->papel = papel; }
-
-    ///
-    /// @brief Obtém o papel funcional da pessoa
-    /// @return Objeto da classe de domínio Papel.
-    ///
     Papel getPapel() const { return papel; }
 };
 
