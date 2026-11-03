@@ -171,28 +171,39 @@ void Prioridade::validar(const std::string& prioridade) const {
 
 
 // Metodos senha 
-void Senha::validar(const string& valor) {
-    if (valor.length() != TAMANHO) {
-        throw invalid_argument("Argumento invalido.");
+void Senha::validar(const std::string& senha) const {
+    // 1. Verificação de comprimento exato (5 caracteres)
+    if (senha.length() != TAMANHO) {
+        throw std::invalid_argument("Senha invalida: deve conter exatamente 5 caracteres.");
     }
 
-    bool temLetra = false;
-    bool temDigito = false;
+    bool possuiLetra = false;
+    bool possuiDigito = false;
 
-    for (char c : valor) {
-        if (isalpha(c)) {
-            temLetra = true;
-        } else if (isdigit(c)) {
-            temDigito = true;
-        } else {
-            throw invalid_argument("Argumento invalido.");
+    // 2. Inspeção caractere a caractere
+    for (std::size_t i = 0; i < TAMANHO; ++i) {
+        unsigned char c = static_cast<unsigned char>(senha[i]);
+
+        // Caracteres permitidos: apenas letras (a-z, A-Z) e dígitos (0-9)
+        if (!std::isalnum(c)) {
+            throw std::invalid_argument("Senha invalida: contem caracteres nao permitidos (apenas letras e digitos).");
+        }
+
+        if (std::isalpha(c)) {
+            possuiLetra = true;
+        }
+
+        if (std::isdigit(c)) {
+            possuiDigito = true;
         }
     }
 
-    if (!temLetra || !temDigito) {
-        throw invalid_argument("Argumento invalido.");
+    // 3. Garantia de conter ao menos uma letra e ao menos um dígito
+    if (!possuiLetra || !possuiDigito) {
+        throw std::invalid_argument("Senha invalida: deve conter pelo menos uma letra e pelo menos um digito.");
     }
 }
+
 
 // Metodos timestamp
 
