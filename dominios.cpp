@@ -4,25 +4,25 @@
 #include <stdexcept>
 
 //Metodos texto
-void Texto::validar(const std::string& valor) const {
+void Texto::validar(const std::string& texto) const {
     // 1. Verificação de tamanho (de 1 a 30 caracteres)
-    if (valor.empty() || valor.length() > 30) {
+    if (texto.empty() || texto.length() > 30) {
         throw std::invalid_argument("Texto invalido: deve conter entre 1 e 30 caracteres.");
     }
 
     // 2. Primeiro caractere deve ser letra maiúscula (A-Z)
-    if (!std::isupper(static_cast<unsigned char>(valor.front()))) {
+    if (!std::isupper(static_cast<unsigned char>(texto.front()))) {
         throw std::invalid_argument("Texto invalido: o primeiro caractere deve ser letra maiuscula.");
     }
 
     // 3. Último caractere deve ser obrigatoriamente um ponto (.)
-    if (valor.back() != '.') {
+    if (texto.back() != '.') {
         throw std::invalid_argument("Texto invalido: o ultimo caractere deve ser um ponto (.).");
     }
 
     // 4. Inspeção caractere a caractere
-    for (std::size_t i = 0; i < valor.length(); ++i) {
-        char c = valor[i];
+    for (std::size_t i = 0; i < texto.length(); ++i) {
+        char c = texto[i];
 
         // Avalia se o caractere atual é um dos sinais de pontuação permitidos
         bool ehPontuacao = (c == ',' || c == ';' || c == '.' || c == ':' || c == '?' || c == '!');
@@ -33,8 +33,8 @@ void Texto::validar(const std::string& valor) const {
         }
 
         // Verifica se uma pontuação é seguida por outra pontuação consecutiva
-        if (ehPontuacao && (i + 1 < valor.length())) {
-            char proximo = valor[i + 1];
+        if (ehPontuacao && (i + 1 < texto.length())) {
+            char proximo = texto[i + 1];
             bool proximoEhPontuacao = (proximo == ',' || proximo == ';' || proximo == '.' || 
                                        proximo == ':' || proximo == '?' || proximo == '!');
             
@@ -148,8 +148,8 @@ void Identificador::validar(const std::string& identificador) const {
 }
 
 // Metodos Limite
-void Limite::validar(int valor) {
-    if (valor < 1 || valor > 25) {
+void Limite::validar(int limite) {
+    if (limite < 1 || limite > 25) {
         throw invalid_argument("Argumento invalido.");
     }
 }
