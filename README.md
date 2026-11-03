@@ -88,11 +88,12 @@ O sistema adota o padrão de **Arquitetura em Camadas (Layered Architecture)** p
 - **Propósito**: Garantir a inversão de dependência (a camada de apresentação sabe o serviço a ser realizado, mas desconhece os detalhes de implementação).
 
 ### 4. Módulos de Software
-A arquitetura é dividida em **4 módulos principais**:
-1. **Módulo de Autenticação / Pessoa**: Gerenciamento de contas e login de usuários.
-2. **Módulo de Projetos**: Criação e controle de projetos.
-3. **Módulo de Quadros**: Organização de quadros Kanban e limites de WIP.
-4. **Módulo de Cartões de Atividade**: Manipulação de tarefas, movimentação de colunas e métricas.
+A arquitetura é dividida em **5 módulos principais**:
+1. **Módulo de Inicialização e Controle**: Tela inicial de intereção com o usuário, permite a. Criação de novo usuário e b. Login e autenticação. Após login apresenta tela com a lista de ações disponíveis: a. Listar Projetos existentes, com opções de gerenciar ou excluir cada projeto, ou ainda apresentar tela com indicadores sobre o projeto; b. Criar Projeto.
+2. **Módulo de Autenticação**: Login de usuários.
+3. **Módulo de Pessoas**: Gerenciamento de conta: a. Alteração de nome, senha, email, papel, e b. Pedido de criação ou exclusão de contas.
+4. **Módulo de Projetos**: Criação e controle de projetos.
+5. **Módulo de Quadros**: Organização de quadros Kanban e limites de WIP. Manipulação de tarefas, movimentação de colunas e métricas de cartões de atividades.
 
 ---
 
