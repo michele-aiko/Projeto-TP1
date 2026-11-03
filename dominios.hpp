@@ -27,7 +27,7 @@ class Estado {
 	/// @param estado Objeto std::string contendo o texto a ser validado.
 	/// @throw std::invalid_argument Lançada se a string informada não for "A FAZER", "FAZENDO" ou "FEITO".
 	///
-		void validarEstado(const std::string& estado) const;
+		void validar(const std::string& estado) const;
 	
 	public:
 	
@@ -76,7 +76,7 @@ class Estado {
 	}
 
 	inline void Estado::setEstado(const std::string& novoEstado) {
-	    validarEstado(novoEstado);
+	    validar(novoEstado);
 	    this->estado = novoEstado;
 	}
 
@@ -94,7 +94,7 @@ class Nome {
 		    /// @param nome Objeto std::string contendo o texto a ser avaliado.
 		    /// @throw std::invalid_argument Lançada se o texto descumprir qualquer regra do domínio Nome.
 		    ///
-		    void validarNome(const std::string& nome) const;
+		    void validar(const std::string& nome) const;
 		
 		public:
 		    ///
@@ -121,7 +121,7 @@ class Nome {
 };
 
 	inline void Nome::setNome(const std::string& novoNome) {
-	    validarNome(novoNome); // Se for inválido, dispara std::invalid_argument
+	    validar(novoNome); // Se for inválido, dispara std::invalid_argument
 	    this->nome = novoNome;
 	}
 
@@ -140,7 +140,7 @@ class Tamanho {
 		    /// @param tamanho Objeto std::string contendo o texto do tamanho a ser validado.
 		    /// @throw std::invalid_argument Lançada se o texto for diferente de "PEQUENO", "MEDIO" ou "GRANDE".
 		    ///
-		    void validarTamanho(const std::string& tamanho) const;
+		    void validar(const std::string& tamanho) const;
 		
 		public:
 		    /// @brief Constante estática pública representando o tamanho PEQUENO.
@@ -192,7 +192,7 @@ class Tamanho {
 	}
 
 	inline void Tamanho::setTamanho(const std::string& novoTamanho) {
-    	validarTamanho(novoTamanho); // Se for inválido, lança std::invalid_argument
+    	validar(novoTamanho); // Se for inválido, lança std::invalid_argument
     	this->tamanho = novoTamanho;
 	}
 
@@ -213,7 +213,7 @@ class Texto {
 		    /// @param texto Objeto std::string contendo o texto a ser avaliado.
 		    /// @throw std::invalid_argument Lançada se o texto descumprir qualquer regra do domínio.
 		    ///
-		    void validarTexto(const std::string& texto) const;
+		    void validar(const std::string& texto) const;
 		
 		public:
 		    ///
@@ -263,7 +263,7 @@ class Email { //Formato válido: parte-local@dominio
 /// @param Recebe string passada por referência
 /// @throw std::invalid_argument Lançada se a string não atender às regras de validação.
 ///
-            void validarEmail(string); 
+            void validar(string); 
 
         public:
 ///
@@ -290,7 +290,7 @@ class Email { //Formato válido: parte-local@dominio
 };
 
 inline void Email::setEmail(std::string novoEmail){
-	validarEmail(novoEmail);
+	validar(novoEmail);
 	this->email = novoEmail;
 }
 
@@ -311,7 +311,7 @@ class Identificador {
 		    /// @param identificador Objeto std::string contendo o código a ser avaliado.
 		    /// @throw std::invalid_argument Lançada se o código descumprir as regras de formato.
 		    ///
-		    void validarIdentificador(const std::string& identificador) const;
+		    void validar(const std::string& identificador) const;
 		
 		public:
 		    ///
@@ -338,7 +338,7 @@ class Identificador {
 };
 
 inline void Identificador::setIdentificador(const std::string& novoIdentificador) {
-		        validarIdentificador(novoIdentificador); // Garante a execução das regras antes da atribuição
+		        validar(novoIdentificador); // Garante a execução das regras antes da atribuição
 		        this->identificador = novoIdentificador;
 		    }
 
