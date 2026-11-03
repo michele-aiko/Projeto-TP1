@@ -46,7 +46,7 @@ void Texto::validar(const std::string& valor) const {
 }
 
 //Metodos nome
-void Nome::validarNome(const std::string& nome) const {
+void Nome::validar(const std::string& nome) const {
 	// 1. Verifica se a string é vazia ou excede o limite máximo de 15 caracteres
 	if (nome.empty() || nome.length() > 15) {
 		throw std::invalid_argument("Nome invalido: deve conter entre 1 e 15 caracteres.");
@@ -77,7 +77,7 @@ void Nome::validarNome(const std::string& nome) const {
 
 
 // Metodos email
-void Email::validarEmail(string novoEmail){ //Pode conter letra (a-z), dígito (0-9) ou ponto(.) ou hífen (-), não pode iniciar ou terminar com ponto ou hífen, ponto ou hifen deve ser seguido de letra(s) ou digito(s)
+void Email::validar(string novoEmail){ //Pode conter letra (a-z), dígito (0-9) ou ponto(.) ou hífen (-), não pode iniciar ou terminar com ponto ou hífen, ponto ou hifen deve ser seguido de letra(s) ou digito(s)
 
 	//Divide novoEmail entre as variáveis parteLocal e dominio
 	size_t posArroba = novoEmail.find('@'); //Busca posição de '@' na string
@@ -126,7 +126,7 @@ void Email::validarEmail(string novoEmail){ //Pode conter letra (a-z), dígito (
 
 
 // Metodos identificador
-void Identificador::validarIdentificador(const std::string& identificador) const {
+void Identificador::validar(const std::string& identificador) const {
     // 1. Verificação do tamanho exato (deve ter exatamente 6 caracteres)
     if (identificador.length() != TAMANHO) {
         throw std::invalid_argument("Identificador invalido: deve conter exatamente 6 caracteres.");
@@ -154,17 +154,6 @@ void Limite::validar(int valor) {
     }
 }
 
-void Limite::setValor(int valor) {
-    validar(valor);
-    this->valor = valor;
-}
-
-int Limite::getValor() const {
-    return valor;
-};
-
-
-
 // Metodos senha 
 void Senha::validar(const string& valor) {
     if (valor.length() != TAMANHO) {
@@ -188,16 +177,6 @@ void Senha::validar(const string& valor) {
         throw invalid_argument("Argumento invalido.");
     }
 }
-
-void Senha::setValor(const string& valor) {
-    validar(valor);
-    this->valor = valor;
-}
-
-string Senha::getValor() const {
-    return valor;
-};
-
 
 // Metodos timestamp
 
@@ -277,13 +256,3 @@ void Timestamp::validar(const string& valor) {
         throw invalid_argument("Argumento invalido.");
     }
 }
-
-void Timestamp::setValor(const string& valor) {
-    validar(valor);
-    this->valor = valor;
-}
-
-string Timestamp::getValor() const {
-    return valor;
-};
-
