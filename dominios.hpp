@@ -571,17 +571,70 @@ public:
 };
 
 
+///
+/// @brief Representa o domínio Timestamp no sistema Kanban.
+/// @details Armazena e valida um carimbo de data e horário no formato DIA-MÊS-ANO-HORÁRIO.
+///          Exemplo de valor válido: "15-JAN-2024-14:30".
+///          Considera meses com 28, 29, 30 e 31 dias, além de regras completas para anos bissextos.
+///
 class Timestamp {
 private:
-    string valor;
+    std::string timestamp; ///< Objeto primitivo std::string contendo a data e horário validados.
 
+    ///
+    /// @brief Verifica se um determinado ano é bissexto.
+    /// @param ano Inteiro representando o ano (2000 a 2099).
+    /// @return true se o ano for bissexto, false caso contrário.
+    ///
     bool ehBissexto(int ano) const;
-    int obterDiasNoMes(const string& mes, int ano) const;
-    void validar(const string& valor);
+
+    ///
+    /// @brief Determina a quantidade máxima de dias permitidos em um mês específico.
+    /// @param mes Sigla do mês com 3 letras maiúsculas (ex: "JAN", "FEV").
+    /// @param ano Inteiro representando o ano, necessário para o cálculo de fevereiro.
+    /// @return Quantidade máxima de dias no mês (28, 29, 30 ou 31), ou 0 se a sigla for inválida.
+    ///
+    int obterDiasNoMes(const std::string& mes, int ano) const;
+
+    ///
+    /// @brief Valida se o formato do Timestamp atende a todas as restrições previstas
+    /// @details Inspeciona a estrutura dos delimitadores hífen ('-') e dois-pontos (':'),
+    ///          a faixa de valores para dia, mês, ano, hora e minuto, e a consistência do calendário.
+    /// @param timestamp Objeto std::string contendo o carimbo temporal a ser auditado.
+    /// @throw std::invalid_argument Lançada se a string descumprir qualquer regra do domínio Timestamp.
+    ///
+    void validar(const std::string& timestamp) const;
 
 public:
-    void setValor(const string& valor);
-    string getValor() const;
+    ///
+    /// @brief Construtor da classe Timestamp
+    /// @details Inicializa o objeto com um valor padrão válido ("01-JAN-2024-12:00") ou valida o parâmetro informado.
+    /// @param valorInicial Objeto std::string contendo o timestamp inicial (padrão: "01-JAN-2024-12:00").
+    /// @throw std::invalid_argument Lançada se valorInicial não atender aos critérios de validação.
+    ///
+    explicit Timestamp(const std::string& valorInicial = "01-JAN-2024-12:00") {
+        setTimeStamp(valorInicial);
+    }
+
+    ///
+    /// @brief Atribui e valida o valor do timestamp
+    /// @details Invoca o método privado validar() e, se aceito, armazena o novo timestamp.
+    /// @param novoValor Objeto std::string contendo a nova data e horário.
+    /// @throw std::invalid_argument Lançada se novoValor for inválido.
+    ///
+    void setTimeStamp(const std::string& novoValor) {
+        validar(novoValor); // Garante a validação antes de persistir na memória
+        this->timestamp = novoValor;
+    }
+
+    ///
+    /// @brief Obtém o timestamp armazenado
+    /// @return Objeto std::string contendo o carimbo de data e hora validado.
+    ///
+    std::string getTImeStamp() const {
+        return timestamp;
+    }
 };
+
 
 #endif // DOMINIOS_HPP_INCLUDED
