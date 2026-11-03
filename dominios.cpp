@@ -161,6 +161,14 @@ void Papel::validar(const std::string& papel) const { // Compara diretamente com
 	} 
 }
 
+// Metodos Prioridade
+void Prioridade::validar(const std::string& prioridade) const {
+    // Compara diretamente com as constantes públicas da classe
+    if (prioridade != ALTA && prioridade != MEDIA && prioridade != BAIXA) {
+        throw std::invalid_argument("Prioridade invalida: O valor deve ser 'ALTA', 'MEDIA' ou 'BAIXA'.");
+    }
+}
+
 
 // Metodos senha 
 void Senha::validar(const string& valor) {
