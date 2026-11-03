@@ -392,39 +392,63 @@ public:
     }
 };
 
+/// 
+/// @brief Representa o domínio Papel desempenhado por um participante no sistema Kanban. 
+/// @details Restringe o papel do usuário estritamente a duas opções válidas: 
+/// 			- "GESTOR": Criador/administrador com permissões completas de gerenciamento. 
+/// 			- "DESENVOLVEDOR": Membro do projeto com permissões operacionais e de consulta. 
+/// 
+class Papel { 
+	private: 
+		std::string papel; ///< Objeto primitivo std::string contendo o papel validado. 
+		
+		/// 
+		/// @brief Valida se o papel informado corresponde a "GESTOR" ou "DESENVOLVEDOR". 
+		/// @details Avalia se o texto fornecido coincide com uma das constantes permitidas da classe. 
+		/// @param papel Objeto std::string contendo o texto a ser avaliado. 
+		/// @throw std::invalid\_argument Lançada se o texto for diferente de "GESTOR" e "DESENVOLVEDOR". 
+		/// 
+		void validar(const std::string& papel) const; 
+	
+	public: 
+		/// @brief Constante estática pública representando a função de GESTOR, aquele que será responsável por criar projetos. 
+		inline static const std::string GESTOR = "GESTOR"; 
 
+		/// @brief Constante estática pública representando a função de DESENVOLVEDOR, aquele que fará parte da equipe do projeto. 
+		inline static const std::string DESENVOLVEDOR = "DESENVOLVEDOR"; 
 
-//papel dos usuarios
-class Papel {
-private:
-    string valor;
+		/// 
+		/// @brief Construtor da classe Papel 
+		/// @details Inicializa o objeto com o papel padrão "GESTOR" ou valida a string informada. 
+		/// @param valorInicial Objeto std::string contendo o papel inicial desejado (padrão: "GESTOR"). 
+		/// @throw std::invalid_argument Lançada se valorInicial não for "GESTOR" nem "DESENVOLVEDOR". 
+		/// 
+		explicit Papel(const std::string& valorInicial = GESTOR) { setValor(valorInicial); } 
 
-    void validar(const string& valor) {
-        if (valor != GESTOR && valor != DESENVOLVEDOR) {
-            throw invalid_argument("Argumento invalido.");
-        }
-    }
+		/// 
+		/// @brief Atribui e valida o papel do participante (Implementação Inline - Padrão TP1). 
+		/// @details Invoca o método privado validar() e, se válido, armazena o novo papel no atributo valor. 
+		/// @param novoValor Objeto std::string contendo o novo papel. 
+		/// @throw std::invalid\_argument Lançada se o novoValor for inválido. 
+		/// 
+		void setValor(const std::string& novoValor) { 
+			validar(novoValor); // Valida antes de persistir na memória 
+			this->valor = novoValor; 
+		} 
 
-public:
-    inline static const string GESTOR = "GESTOR";
-    inline static const string DESENVOLVEDOR = "DESENVOLVEDOR";
-
-    Papel(const string& valorInicial = GESTOR) {
-        setValor(valorInicial);
-    }
-
-    void setValor(const string& novoValor) {
-        validar(novoValor);
-        valor = novoValor;
-    }
-
-    string getValor() const {
-        return valor;
-    }
-
-    static vector<string> getOpcoes() {
-        return {GESTOR, DESENVOLVEDOR};
-    }
+		/// 
+		/// @brief Obtém o papel armazenado (Implementação Inline - Padrão TP1).
+		/// @return Objeto std::string contendo o papel validado ("GESTOR" ou "DESENVOLVEDOR"). 
+		/// 
+		std::string getValor() const { return valor; } 
+		/// 
+		/// 
+		/// @brief Retorna um vetor contendo a lista com todas as opções válidas. 
+		/// @return Objeto std::vector<std::string> contendo as opções de papeis de pessoas envolvidas no projeto: {"GESTOR", "DESENVOLVEDOR"}.
+		/// 
+		static std::vector<std::string> getOpcoes() {
+			return {GESTOR, DESENVOLVEDOR};
+		}
 };
 
 //classe das prioridades
