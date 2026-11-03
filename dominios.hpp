@@ -392,6 +392,7 @@ public:
     }
 };
 
+
 /// 
 /// @brief Representa o domínio Papel desempenhado por um participante no sistema Kanban. 
 /// @details Restringe o papel do usuário estritamente a duas opções válidas: 
@@ -406,7 +407,7 @@ class Papel {
 		/// @brief Valida se o papel informado corresponde a "GESTOR" ou "DESENVOLVEDOR". 
 		/// @details Avalia se o texto fornecido coincide com uma das constantes permitidas da classe. 
 		/// @param papel Objeto std::string contendo o texto a ser avaliado. 
-		/// @throw std::invalid\_argument Lançada se o texto for diferente de "GESTOR" e "DESENVOLVEDOR". 
+		/// @throw std::invalid_argument Lançada se o texto for diferente de "GESTOR" e "DESENVOLVEDOR". 
 		/// 
 		void validar(const std::string& papel) const; 
 	
@@ -426,10 +427,10 @@ class Papel {
 		explicit Papel(const std::string& valorInicial = GESTOR) { setValor(valorInicial); } 
 
 		/// 
-		/// @brief Atribui e valida o papel do participante (Implementação Inline - Padrão TP1). 
+		/// @brief Atribui e valida o papel do participante do projeto
 		/// @details Invoca o método privado validar() e, se válido, armazena o novo papel no atributo valor. 
 		/// @param novoValor Objeto std::string contendo o novo papel. 
-		/// @throw std::invalid\_argument Lançada se o novoValor for inválido. 
+		/// @throw std::invalid_argument Lançada se o novoValor for inválido. 
 		/// 
 		void setValor(const std::string& novoValor) { 
 			validar(novoValor); // Valida antes de persistir na memória 
@@ -437,7 +438,7 @@ class Papel {
 		} 
 
 		/// 
-		/// @brief Obtém o papel armazenado (Implementação Inline - Padrão TP1).
+		/// @brief Obtém o papel armazenado para a pessoa parte de um projeto
 		/// @return Objeto std::string contendo o papel validado ("GESTOR" ou "DESENVOLVEDOR"). 
 		/// 
 		std::string getValor() const { return valor; } 
@@ -451,39 +452,73 @@ class Papel {
 		}
 };
 
-//classe das prioridades
+///
+/// @brief Representa o domínio Prioridade de uma atividade no quadro Kanban.
+/// @details Restringe a prioridade de uma tarefa estritamente às opções pré-definidas:
+///          - "ALTA"
+///          - "MEDIA"
+///          - "BAIXA"
+///          Qualquer tentativa de atribuir valor diferente dessas opções resultará no
+///          lançamento de exceção std::invalid_argument.
+///
 class Prioridade {
 private:
-    string valor;
+    std::string prioridade; ///< Objeto primitivo std::string que armazena a prioridade validada.
 
-    void validar(const string& valor) {
-        if (valor != ALTA && valor != MEDIA && valor != BAIXA) {
-            throw invalid_argument("Argumento invalido.");
-        }
-    }
+    ///
+    /// @brief Valida se a string fornecida corresponde a uma prioridade permitida.
+    /// @details Compara o texto recebido com as constantes estáticas ALTA, MEDIA e BAIXA.
+    /// @param valor Objeto std::string contendo a prioridade a ser avaliada.
+    /// @throw std::invalid_argument Lançada se a prioridade for diferente de "ALTA", "MEDIA" e "BAIXA".
+    ///
+    void validar(const std::string& prioridade) const;
 
 public:
-    inline static const string ALTA = "ALTA";
-    inline static const string MEDIA = "MEDIA";
-    inline static const string BAIXA = "BAIXA";
+    /// @brief Constante estática pública representando prioridade ALTA.
+    inline static const std::string ALTA = "ALTA";
 
-    Prioridade(const string& valorInicial = BAIXA) {
-        setValor(valorInicial);
+    /// @brief Constante estática pública representando prioridade MEDIA.
+    inline static const std::string MEDIA = "MEDIA";
+
+    /// @brief Constante estática pública representando prioridade BAIXA.
+    inline static const std::string BAIXA = "BAIXA";
+
+    ///
+    /// @brief Construtor da classe Prioridade
+    /// @details Inicializa o objeto com a prioridade padrão "BAIXA" ou valida o valor fornecido.
+    /// @param valorInicial Objeto std::string contendo a prioridade inicial desejada (padrão: "BAIXA").
+    /// @throw std::invalid_argument Lançada se valorInicial não for uma prioridade válida.
+    ///
+    explicit Prioridade(const std::string& valorInicial = BAIXA) {
+        setPrioridade(valorInicial);
     }
 
-    void setValor(const string& novoValor) {
-        validar(novoValor);
-        valor = novoValor;
+    ///
+    /// @brief Atribui e valida a prioridade da tarefa
+    /// @details Invoca o método privado validar() e, se aceito, armazena o novo valor na memória.
+    /// @param novoValor Objeto std::string contendo a nova prioridade.
+    /// @throw std::invalid_argument Lançada se novoValor for inválido.
+    ///
+    void setPrioridade(const std::string& novoValor) {
+        validar(novoValor); // Garante a validação antes da persistência
+        this->prioridade = novoValor;
     }
 
-    string getValor() const {
-        return valor;
-    }
+    ///
+    /// @brief Obtém a prioridade armazenada para uma atividade
+    /// @return Objeto std::string contendo a prioridade validada ("ALTA", "MEDIA" ou "BAIXA").
+    ///
+    std::string getPrioridade() const {  return prioridade;  }
 
-    static vector<string> getOpcoes() {
+    ///
+    /// @brief Retorna a lista com todas as opções de prioridade válidas.
+    /// @return Objeto std::vector<std::string> contendo {"ALTA", "MEDIA", "BAIXA"}.
+    ///
+    static std::vector<std::string> getOpcoes() {
         return {ALTA, MEDIA, BAIXA};
     }
 };
+
 
 //classe das senhas
 class Senha {
