@@ -154,6 +154,14 @@ void Limite::validar(int valor) {
     }
 }
 
+// Metodos Papel
+void Papel::validar(const std::string& papel) const { // Compara diretamente com as constantes públicas da classe 
+	if (papel != GESTOR && papel != DESENVOLVEDOR) { 
+		throw std::invalid_argument("Papel invalido: O valor deve ser 'GESTOR' ou 'DESENVOLVEDOR'."); 
+	} 
+}
+
+
 // Metodos senha 
 void Senha::validar(const string& valor) {
     if (valor.length() != TAMANHO) {
