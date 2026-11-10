@@ -21,13 +21,13 @@ private:
     // Construtor privado para evitar instanciação direta fora do Singleton
     ContainerDados() = default;
 
-    // --- Tabelas de Dados (Chave Primária -> Entidade) ---
+    // Tabelas de Dados (Chave Primária -> Entidade)
     std::map<std::string, Pessoa> tabelaPessoas;                     ///< Chave: Email (string)
     std::map<std::string, Projeto> tabelaProjetos;                   ///< Chave: Identificador (string)
     std::map<std::string, Quadro> tabelaQuadros;                     ///< Chave: Identificador (string)
     std::map<std::string, CartaoDeAtividade> tabelaCartoes;           ///< Chave: Identificador (string)
 
-    // --- Mapeamentos Relacionais de Chave Estrangeira ---
+    // Mapeamentos Relacionais de Chave Estrangeira
     std::map<std::string, std::string> vinculoProjetoGestor;         ///< ID Projeto -> Email Gestor
     std::map<std::string, std::string> vinculoQuadroProjeto;         ///< ID Quadro -> ID Projeto
     std::map<std::string, std::string> vinculoCartaoQuadro;          ///< ID Cartão -> ID Quadro
@@ -36,7 +36,7 @@ public:
     // Destrutor padrão
     ~ContainerDados() = default;
 
-    // Proíbe cópia e atribuição para preservar a unicidade do Singleton
+    // Métodos que irão excluir qualquer tentativa de cópia e atribuição direta do contêiner para preservar a unicidade do Singleton
     ContainerDados(const ContainerDados&) = delete;
     ContainerDados& operator=(const ContainerDados&) = delete;
 
@@ -52,6 +52,7 @@ public:
 
     ///
     /// @brief Insere uma nova pessoa no contêiner.
+    // CONFIRMAR POSSIBILIDADE DE UTILIZAR O EMAIL COMO PARÂMETRO PARA CRIAÇÃO DA PESSOA
     /// @param pessoa Objeto da classe Pessoa devidamente preenchido.
     /// @return true se cadastrada com sucesso; false caso o e-mail já exista.
     ///
@@ -59,14 +60,16 @@ public:
 
     ///
     /// @brief Busca uma pessoa pelo e-mail (chave primária).
+    // CONFIRMAR NECESSIDADE DE ADICIONAR TAMBÉM O PARAMETRO PESSOA
     /// @param email Objeto Email a ser consultado.
     /// @param pessoa Referência para armazenar o objeto localizado.
     /// @return true se encontrada; false caso contrário.
     ///
-    bool buscarPessoa(const Email& email, Pessoa& pessoa) const;
+    bool buscarPessoa(const Email& email) const;
 
     ///
     /// @brief Atualiza os dados de uma pessoa já existente.
+    // CONFIRMAR POSSIBILIDADE DE UTILIZAR O EMAIL COMO PARÂMETRO PARA ATUALIZAÇÃO DA PESSOA
     /// @param pessoa Objeto Pessoa contendo o e-mail chave e os dados alterados.
     /// @return true se atualizada com sucesso; false se o e-mail não existir.
     ///
@@ -90,20 +93,22 @@ public:
     // =========================================================================
 
     ///
-    /// @brief Insere um novo projeto associado a um Gestor criador.
+    /// @brief Insere um novo projeto no containêr e associa ao Gestor criador.
+    // CONFIRMAR NECESSIDADE DE ADICIONAR TAMBÉM O PARÂMETRO EMAIL DO GESTOR
     /// @param projeto Objeto Projeto a ser salvo.
     /// @param emailGestor Objeto Email do gestor responsável pelo projeto.
     /// @return true se inserido com sucesso; false se o identificador já existir.
     ///
-    bool inserirProjeto(const Projeto& projeto, const Email& emailGestor);
+    bool inserirProjeto(const Projeto& projeto);
 
     ///
     /// @brief Busca um projeto pelo seu código identificador.
+    // CONFIRMAR NECESSIDADE DE ADICIONAR TAMBÉM O PARÂMETRO PROJETO
     /// @param id Objeto Identificador do projeto.
     /// @param projeto Referência para armazenar o objeto localizado.
     /// @return true se encontrado; false caso contrário.
     ///
-    bool buscarProjeto(const Identificador& id, Projeto& projeto) const;
+    bool buscarProjeto(const Identificador& id) const;
 
     ///
     /// @brief Atualiza as informações de um projeto existente.
@@ -146,11 +151,12 @@ public:
 
     ///
     /// @brief Busca um quadro pelo seu código identificador.
+    // CONFIRMAR NECESSIDADE DE ADICIONAR TAMBÉM O PARÂMETRO QUADRO
     /// @param id Objeto Identificador do quadro.
     /// @param quadro Referência para armazenar o objeto localizado.
     /// @return true se encontrado; false caso contrário.
     ///
-    bool buscarQuadro(const Identificador& id, Quadro& quadro) const;
+    bool buscarQuadro(const Identificador& id) const;
 
     ///
     /// @brief Atualiza as informações de um quadro (como o limite de WIP ou nome).
@@ -187,11 +193,12 @@ public:
 
     ///
     /// @brief Busca um cartão pelo seu identificador único.
+    // CONFIRMAR NECESSIDADE DE ADICIONAR TAMBÉM O PARÂMETRO CARTÃO 
     /// @param id Objeto Identificador do cartão.
     /// @param cartao Referência para armazenar o objeto localizado.
     /// @return true se encontrado; false caso contrário.
     ///
-    bool buscarCartao(const Identificador& id, CartaoDeAtividade& cartao) const;
+    bool buscarCartao(const Identificador& id) const;
 
     ///
     /// @brief Atualiza os dados de um cartão de atividade.
@@ -215,12 +222,19 @@ public:
     std::vector<CartaoDeAtividade> listarCartoesPorQuadro(const Identificador& idQuadro) const;
 
     ///
+    /// @brief Lista todos os cartões vinculados a uma determinada pessoa, independente de estarem no mesmo projeto.
+    /// @param email Objeto Email da pessoa pesquisada.
+    /// @return Vetor com todos os cartões cadastrados para o usuário informado.
+    ///
+    std::vector<CartaoDeAtividade> listarCartoesPorPessoa(const Email& email) const;
+
+    /// CONFIRMAR NECESSIDADE DESSE MÉTODO
     /// @brief Recupera o identificador do quadro ao qual um cartão pertence.
     /// @param idCartao Identificador do cartão pesquisado.
     /// @param idQuadro Referência onde será gravado o identificador do quadro.
     /// @return true se o vínculo for localizado; false caso contrário.
     ///
-    bool obterQuadroDoCartao(const Identificador& idCartao, Identificador& idQuadro) const;
+    //bool obterQuadroDoCartao(const Identificador& idCartao, Identificador& idQuadro) const;
 };
 
 #endif // CONTAINERDADOS_HPP_INCLUDED
