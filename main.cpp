@@ -1,5 +1,7 @@
 #include "apresentacao.hpp"
 #include "servicos.hpp"
+#include "testeUnit.hpp"
+#include "testeFumaca.hpp"
 #include <iostream>
 #include <stdexcept>
 
@@ -33,7 +35,15 @@ int main() {
     apresentacaoControle.setServicoProjetos(&servicoProjetos);
     apresentacaoControle.setServicoQuadros(&servicoQuadros);
 
-    // 3. Execução do sistema (tela inicial, login e menu principal)
+    // 3. Testes (Unitários e Fumaça). Cada módulo acrescenta aqui a chamada dos seus próprios testes.
+    TUTesteServicos suiteTestes;
+    suiteTestes.executar();
+    TUApresentacaoControle testesControle;
+    testesControle.executar();
+    TFumacaControle fumacaControle;
+    fumacaControle.executar(apresentacaoControle);
+
+    // 4. Execução do sistema (tela inicial, login e menu principal)
     try {
         apresentacaoControle.executar();
     } catch (const std::runtime_error& e) {
