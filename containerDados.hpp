@@ -13,6 +13,7 @@
 ///          utilizando tabelas hash/árvores balanceadas (std::map) indexadas pelas respectivas chaves primárias textuais.
 ///          Garante o suporte a todas as operações CRUD e consultas relacionais exigidas pelos serviços.
 ///
+//AJUSTAR!!!! CRIAR UMA CLASSE PARA CADA TIPO DE CONTEINER
 class ContainerDados {
 private:
     // Instância única para padrão Singleton
