@@ -1,40 +1,47 @@
-#include "apresentacao.hpp" 
-#include "servicos.hpp" 
-#include "testeUnit.hpp" 
+#include "apresentacao.hpp"
+#include "servicos.hpp"
 #include <iostream>
+#include <stdexcept>
 
-//Código abaixo apenas para TESTE. O processos descritos em 1, 2 e 3 devem ser implementados pelo módulo Inicialização e Controle
+// A tela inicial com os menus de opcoes ficam em ApresentacaoControle.
+// Ainda sem rodar porque depende da criacao de outros objetos da apresentacao
 
-int main() { 
-    // 1. Executa a bateria de Testes Unitários dos Serviços 
-    TUTesteServicos suiteTestes; 
-    suiteTestes.executar();
-    // 2. Instanciação das Camadas Concretas (Serviços e Apresentação) 
+int main() {
+    // 1. Instanciação das Camadas Concretas (Serviços e Apresentação)
+    ServicoAutenticacao servicoAutenticacao;
+    ServicoPessoas servicoPessoas;
     ServicoProjetos servicoProjetos;
+    ServicoQuadros servicoQuadros;
+
+    ApresentacaoAutenticacao apresentacaoAutenticacao;
+    ApresentacaoPessoas apresentacaoPessoas;
     ApresentacaoProjetos apresentacaoProjetos;
-    // 3. Injeção de Dependências (Ligação pelas Interfaces Abstratas)
-    apresentacaoProjetos.setServico(&servicoProjetos); 
-    
-    // 4. Criação do usuário de demonstração para a sessão 
-    Pessoa gestorSessao(Email("gestor@unb.br"), Nome("Joyce Gestor"), Senha("A1b2c"), Papel(Papel::GESTOR));
-    
-    int acaoTeste = 0; 
-    std::cout << "========================================\n"; 
-    std::cout << " SISTEMA KANBAN - PROJETOS E QUADROS \n"; 
-    std::cout << "========================================\n"; 
-    std::cout << "1. Abrir Menu de Projetos\n"; 
-    std::cout << "2. Abrir Quadro Kanban de Exemplo (QDR001)\n"; 
-    std::cout << "0. Sair\n"; 
-    std::cout << "Escolha uma opcao: "; 
-    std::cin >> acaoTeste;
-    
-    if (acaoTeste == 1) { 
-        apresentacaoProjetos.executar(gestorSessao); 
-    } else if (acaoTeste == 2) { 
-        apresentacaoQuadros.exibirQuadro(Identificador("QDR001"), gestorSessao); 
+    ApresentacaoQuadros apresentacaoQuadros;
+    ApresentacaoControle apresentacaoControle;
+
+    // 2. Injeção de Dependências (Ligação pelas Interfaces Abstratas)
+    apresentacaoAutenticacao.setServico(&servicoAutenticacao);
+    apresentacaoPessoas.setServico(&servicoPessoas);
+    apresentacaoProjetos.setServico(&servicoProjetos);
+    apresentacaoQuadros.setServico(&servicoQuadros);
+
+    apresentacaoControle.setApresentacaoAutenticacao(&apresentacaoAutenticacao);
+    apresentacaoControle.setApresentacaoPessoas(&apresentacaoPessoas);
+    apresentacaoControle.setApresentacaoProjetos(&apresentacaoProjetos);
+    apresentacaoControle.setApresentacaoQuadros(&apresentacaoQuadros);
+    apresentacaoControle.setServicoPessoas(&servicoPessoas);
+    apresentacaoControle.setServicoProjetos(&servicoProjetos);
+    apresentacaoControle.setServicoQuadros(&servicoQuadros);
+
+    // 3. Execução do sistema (tela inicial, login e menu principal)
+    try {
+        apresentacaoControle.executar();
+    } catch (const std::runtime_error& e) {
+        std::cerr << "ERRO FATAL: " << e.what() << "\n";
+        return 1;
     }
-    
-    std::cout << "\nEncerrando o programa com sucesso.\n"; 
+
+    std::cout << "\nEncerrando o programa com sucesso.\n";
     return 0;
 
 }
