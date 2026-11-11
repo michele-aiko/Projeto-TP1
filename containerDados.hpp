@@ -7,17 +7,19 @@
 #include <vector>
 #include <string>
 
-// =============================================================================
-// CONTÊINERES DE DADOS
-// Um contêiner (classe) para cada tabela de dados, cada um com a sua própria tabela, o seu
-// vínculo de chave estrangeira e os seus métodos. Os contêineres NÃO chamam uns aos outros:
-// quem cruza informações entre eles (exclusão em cascata, validação de gestor etc.) é a
-// camada de serviço, usando os métodos de acesso de cada contêiner.
-// =============================================================================
+///
+/// @brief Contêineres padrão Singleton para persistência de dados sobre entidades e seus relacionamentos.
+/// @details Implementa o armazenamento das quatro entidades do sistema (Pessoa, Projeto, Quadro, CartaoDeAtividade),
+///          cada uma com sua própria tabela (std::map) indexada pelas respectivas chaves primárias.
+///          Garante o suporte a todas as operações CRUD e consultas relacionais exigidas pelos serviços.
+///          Os contêineres NÃO chamam uns aos outros: o cruzamento de informações entre eles (exclusão em cascata, validação de gestor etc.)
+///          é realizado na camada de serviços usando os métodos de acesso de cada contêiner.
+/// 
 
 ///
 /// @brief Contêiner de dados da entidade Pessoa.
 /// @details Armazena em memória a tabela de pessoas (std::map), indexada pelo e-mail (chave primária).
+///          Contém métodos para operações CRUD e consultas relacionais.
 ///
 class ContainerPessoas {
 private:
@@ -28,19 +30,19 @@ private:
     ContainerPessoas() = default;
 
     // --- Tabela de Dados (Chave Primária -> Entidade) ---
-    std::map<std::string, Pessoa> tabelaPessoas;                     ///< Chave: Email (string)
+    std::map<std::string, Pessoa> tabelaPessoas;    ///< Chave: Email (string)
 
 public:
     // Destrutor padrão
     ~ContainerPessoas() = default;
 
-    // Proíbe cópia e atribuição para preservar a unicidade do Singleton
+    // Métodos que irão excluir qualquer tentativa de cópia e atribuição direta do contêiner para preservar a unicidade do Singleton
     ContainerPessoas(const ContainerPessoas&) = delete;
     ContainerPessoas& operator=(const ContainerPessoas&) = delete;
 
     ///
-    /// @brief Obtém o ponteiro da instância única do contêiner de pessoas.
-    /// @return Ponteiro para a instância única de ContainerPessoas.
+    /// @brief Método para obter a instância única do contêiner de pessoas.
+    /// @return Ponteiro para ContainerPessoas.
     ///
     static ContainerPessoas* getInstancia();
 
@@ -111,13 +113,13 @@ public:
     // Destrutor padrão
     ~ContainerProjetos() = default;
 
-    // Proíbe cópia e atribuição para preservar a unicidade do Singleton
+    // Métodos que irão excluir qualquer tentativa de cópia e atribuição direta do contêiner para preservar a unicidade do Singleton
     ContainerProjetos(const ContainerProjetos&) = delete;
     ContainerProjetos& operator=(const ContainerProjetos&) = delete;
 
     ///
-    /// @brief Obtém o ponteiro da instância única do contêiner de projetos.
-    /// @return Ponteiro para a instância única de ContainerProjetos.
+    /// @brief Método para obter a instância única do contêiner de projetos.
+    /// @return Ponteiro para ContainerProjetos.
     ///
     static ContainerProjetos* getInstancia();
 
@@ -207,13 +209,13 @@ public:
     // Destrutor padrão
     ~ContainerQuadros() = default;
 
-    // Proíbe cópia e atribuição para preservar a unicidade do Singleton
+    // Métodos que irão excluir qualquer tentativa de cópia e atribuição direta do contêiner para preservar a unicidade do Singleton
     ContainerQuadros(const ContainerQuadros&) = delete;
     ContainerQuadros& operator=(const ContainerQuadros&) = delete;
 
     ///
-    /// @brief Obtém o ponteiro da instância única do contêiner de quadros.
-    /// @return Ponteiro para a instância única de ContainerQuadros.
+    /// @brief Método para obter a instância única do contêiner de quadros.
+    /// @return Ponteiro para ContainerQuadros.
     ///
     static ContainerQuadros* getInstancia();
 
@@ -304,13 +306,13 @@ public:
     // Destrutor padrão
     ~ContainerCartoes() = default;
 
-    // Proíbe cópia e atribuição para preservar a unicidade do Singleton
+     // Métodos que irão excluir qualquer tentativa de cópia e atribuição direta do contêiner para preservar a unicidade do Singleton
     ContainerCartoes(const ContainerCartoes&) = delete;
     ContainerCartoes& operator=(const ContainerCartoes&) = delete;
 
     ///
-    /// @brief Obtém o ponteiro da instância única do contêiner de cartões.
-    /// @return Ponteiro para a instância única de ContainerCartoes.
+    /// @brief Método para obter a instância única do contêiner de cartões.
+    /// @return Ponteiro para ContainerCartoes.
     ///
     static ContainerCartoes* getInstancia();
 
@@ -350,6 +352,12 @@ public:
     /// @return Vetor com todos os cartões cadastrados naquele quadro.
     ///
     std::vector<CartaoDeAtividade> listarCartoesPorQuadro(const Identificador& idQuadro) const;
+
+    /// @brief Lista todos os cartões vinculados a uma determinada pessoa, independente de estarem no mesmo projeto.
+    /// @param email Objeto Email da pessoa pesquisada.
+    /// @return Vetor com todos os cartões cadastrados para o usuário informado.
+    ///
+    std::vector<CartaoDeAtividade> listarCartoesPorPessoa(const Email& email) const;
 
     ///
     /// @brief Recupera o identificador do quadro ao qual um cartão pertence.
