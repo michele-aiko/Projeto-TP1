@@ -7,53 +7,45 @@
 #include <vector>
 #include <string>
 
+// =============================================================================
+// CONTÊINERES DE DADOS
+// Um contêiner (classe) para cada tabela de dados, cada um com a sua própria tabela, o seu
+// vínculo de chave estrangeira e os seus métodos. Os contêineres NÃO chamam uns aos outros:
+// quem cruza informações entre eles (exclusão em cascata, validação de gestor etc.) é a
+// camada de serviço, usando os métodos de acesso de cada contêiner.
+// =============================================================================
+
 ///
-/// @brief Contêiner de dados centralizado em memória para persistência de dados sobre entidades e seus relacionamentos.
-/// @details Implementa o armazenamento das quatro entidades do sistema (Pessoa, Projeto, Quadro, CartaoDeAtividade)
-///          utilizando tabelas hash/árvores balanceadas (std::map) indexadas pelas respectivas chaves primárias textuais.
-///          Garante o suporte a todas as operações CRUD e consultas relacionais exigidas pelos serviços.
+/// @brief Contêiner de dados da entidade Pessoa.
+/// @details Armazena em memória a tabela de pessoas (std::map), indexada pelo e-mail (chave primária).
 ///
-//AJUSTAR!!!! CRIAR UMA CLASSE PARA CADA TIPO DE CONTEINER
-class ContainerDados {
+class ContainerPessoas {
 private:
     // Instância única para padrão Singleton
-    static ContainerDados* instancia;
+    static ContainerPessoas* instancia;
 
     // Construtor privado para evitar instanciação direta fora do Singleton
-    ContainerDados() = default;
+    ContainerPessoas() = default;
 
-    // Tabelas de Dados (Chave Primária -> Entidade)
+    // --- Tabela de Dados (Chave Primária -> Entidade) ---
     std::map<std::string, Pessoa> tabelaPessoas;                     ///< Chave: Email (string)
-    std::map<std::string, Projeto> tabelaProjetos;                   ///< Chave: Identificador (string)
-    std::map<std::string, Quadro> tabelaQuadros;                     ///< Chave: Identificador (string)
-    std::map<std::string, CartaoDeAtividade> tabelaCartoes;           ///< Chave: Identificador (string)
-
-    // Mapeamentos Relacionais de Chave Estrangeira
-    std::map<std::string, std::string> vinculoProjetoGestor;         ///< ID Projeto -> Email Gestor
-    std::map<std::string, std::string> vinculoQuadroProjeto;         ///< ID Quadro -> ID Projeto
-    std::map<std::string, std::string> vinculoCartaoQuadro;          ///< ID Cartão -> ID Quadro
 
 public:
     // Destrutor padrão
-    ~ContainerDados() = default;
+    ~ContainerPessoas() = default;
 
-    // Métodos que irão excluir qualquer tentativa de cópia e atribuição direta do contêiner para preservar a unicidade do Singleton
-    ContainerDados(const ContainerDados&) = delete;
-    ContainerDados& operator=(const ContainerDados&) = delete;
+    // Proíbe cópia e atribuição para preservar a unicidade do Singleton
+    ContainerPessoas(const ContainerPessoas&) = delete;
+    ContainerPessoas& operator=(const ContainerPessoas&) = delete;
 
     ///
-    /// @brief Obtém o ponteiro da instância única do contêiner de dados.
-    /// @return Ponteiro para a instância única de ContainerDados.
+    /// @brief Obtém o ponteiro da instância única do contêiner de pessoas.
+    /// @return Ponteiro para a instância única de ContainerPessoas.
     ///
-    static ContainerDados* getInstancia();
-
-    // =========================================================================
-    // OPERAÇÕES DE PESSOA
-    // =========================================================================
+    static ContainerPessoas* getInstancia();
 
     ///
     /// @brief Insere uma nova pessoa no contêiner.
-    // CONFIRMAR POSSIBILIDADE DE UTILIZAR O EMAIL COMO PARÂMETRO PARA CRIAÇÃO DA PESSOA
     /// @param pessoa Objeto da classe Pessoa devidamente preenchido.
     /// @return true se cadastrada com sucesso; false caso o e-mail já exista.
     ///
@@ -61,16 +53,14 @@ public:
 
     ///
     /// @brief Busca uma pessoa pelo e-mail (chave primária).
-    // CONFIRMAR NECESSIDADE DE ADICIONAR TAMBÉM O PARAMETRO PESSOA
     /// @param email Objeto Email a ser consultado.
     /// @param pessoa Referência para armazenar o objeto localizado.
     /// @return true se encontrada; false caso contrário.
     ///
-    bool buscarPessoa(const Email& email) const;
+    bool buscarPessoa(const Email& email, Pessoa& pessoa) const;
 
     ///
     /// @brief Atualiza os dados de uma pessoa já existente.
-    // CONFIRMAR POSSIBILIDADE DE UTILIZAR O EMAIL COMO PARÂMETRO PARA ATUALIZAÇÃO DA PESSOA
     /// @param pessoa Objeto Pessoa contendo o e-mail chave e os dados alterados.
     /// @return true se atualizada com sucesso; false se o e-mail não existir.
     ///
@@ -89,27 +79,63 @@ public:
     ///
     std::vector<Pessoa> listarPessoas() const;
 
-    // =========================================================================
-    // OPERAÇÕES DE PROJETO
-    // =========================================================================
+    ///
+    /// @brief verifica se existe uma pessoa com o e-mail informado.
+    /// @details Usado pelos serviços de outros módulos (por exemplo, para validar o gestor de um projeto).
+    /// @param email Objeto Email a ser consultado.
+    /// @return true se existir; false caso contrário.
+    ///
+    bool existePessoa(const Email& email) const;
+};
+
+///
+/// @brief Contêiner de dados da entidade Projeto.
+/// @details Armazena em memória a tabela de projetos (std::map), indexada pelo identificador (chave primária),
+///          e o vínculo de chave estrangeira Projeto -> Gestor.
+///
+class ContainerProjetos {
+private:
+    // Instância única para padrão Singleton
+    static ContainerProjetos* instancia;
+
+    // Construtor privado para evitar instanciação direta fora do Singleton
+    ContainerProjetos() = default;
+
+    // --- Tabela de Dados (Chave Primária -> Entidade) ---
+    std::map<std::string, Projeto> tabelaProjetos;                   ///< Chave: Identificador (string)
+
+    // --- Mapeamento Relacional de Chave Estrangeira ---
+    std::map<std::string, std::string> vinculoProjetoGestor;         ///< ID Projeto -> Email Gestor
+
+public:
+    // Destrutor padrão
+    ~ContainerProjetos() = default;
+
+    // Proíbe cópia e atribuição para preservar a unicidade do Singleton
+    ContainerProjetos(const ContainerProjetos&) = delete;
+    ContainerProjetos& operator=(const ContainerProjetos&) = delete;
 
     ///
-    /// @brief Insere um novo projeto no containêr e associa ao Gestor criador.
-    // CONFIRMAR NECESSIDADE DE ADICIONAR TAMBÉM O PARÂMETRO EMAIL DO GESTOR
+    /// @brief Obtém o ponteiro da instância única do contêiner de projetos.
+    /// @return Ponteiro para a instância única de ContainerProjetos.
+    ///
+    static ContainerProjetos* getInstancia();
+
+    ///
+    /// @brief Insere um novo projeto associado a um Gestor criador.
     /// @param projeto Objeto Projeto a ser salvo.
     /// @param emailGestor Objeto Email do gestor responsável pelo projeto.
     /// @return true se inserido com sucesso; false se o identificador já existir.
     ///
-    bool inserirProjeto(const Projeto& projeto);
+    bool inserirProjeto(const Projeto& projeto, const Email& emailGestor);
 
     ///
     /// @brief Busca um projeto pelo seu código identificador.
-    // CONFIRMAR NECESSIDADE DE ADICIONAR TAMBÉM O PARÂMETRO PROJETO
     /// @param id Objeto Identificador do projeto.
     /// @param projeto Referência para armazenar o objeto localizado.
     /// @return true se encontrado; false caso contrário.
     ///
-    bool buscarProjeto(const Identificador& id) const;
+    bool buscarProjeto(const Identificador& id, Projeto& projeto) const;
 
     ///
     /// @brief Atualiza as informações de um projeto existente.
@@ -119,7 +145,10 @@ public:
     bool atualizarProjeto(const Projeto& projeto);
 
     ///
-    /// @brief Remove um projeto e todos os seus vínculos associados.
+    /// @brief Remove um projeto e o seu vínculo com o gestor.
+    /// @details Não remove os quadros nem os cartões do projeto: essa exclusão em cascata é feita
+    ///          pelo serviço, usando ContainerQuadros::removerQuadrosPorProjeto e
+    ///          ContainerCartoes::removerCartoesPorQuadro.
     /// @param id Objeto Identificador do projeto a ser excluído.
     /// @return true se removido com sucesso; false se inexistente.
     ///
@@ -138,9 +167,55 @@ public:
     ///
     std::vector<Projeto> listarTodosProjetos() const;
 
-    // =========================================================================
-    // OPERAÇÕES DE QUADRO
-    // =========================================================================
+    ///
+    /// @brief verifica se existe um projeto com o identificador informado.
+    /// @details Usado pelo serviço de Quadros para validar o projeto antes de criar um quadro.
+    /// @param id Objeto Identificador do projeto.
+    /// @return true se existir; false caso contrário.
+    ///
+    bool existeProjeto(const Identificador& id) const;
+
+    ///
+    /// @brief recupera o e-mail do gestor responsável por um projeto.
+    /// @param idProjeto Identificador do projeto pesquisado.
+    /// @param emailGestor Referência onde será gravado o e-mail do gestor.
+    /// @return true se o vínculo for localizado; false caso contrário.
+    ///
+    bool obterGestorDoProjeto(const Identificador& idProjeto, Email& emailGestor) const;
+};
+
+///
+/// @brief Contêiner de dados da entidade Quadro.
+/// @details Armazena em memória a tabela de quadros (std::map), indexada pelo identificador (chave primária),
+///          e o vínculo de chave estrangeira Quadro -> Projeto.
+///
+class ContainerQuadros {
+private:
+    // Instância única para padrão Singleton
+    static ContainerQuadros* instancia;
+
+    // Construtor privado para evitar instanciação direta fora do Singleton
+    ContainerQuadros() = default;
+
+    // --- Tabela de Dados (Chave Primária -> Entidade) ---
+    std::map<std::string, Quadro> tabelaQuadros;                     ///< Chave: Identificador (string)
+
+    // --- Mapeamento Relacional de Chave Estrangeira ---
+    std::map<std::string, std::string> vinculoQuadroProjeto;         ///< ID Quadro -> ID Projeto
+
+public:
+    // Destrutor padrão
+    ~ContainerQuadros() = default;
+
+    // Proíbe cópia e atribuição para preservar a unicidade do Singleton
+    ContainerQuadros(const ContainerQuadros&) = delete;
+    ContainerQuadros& operator=(const ContainerQuadros&) = delete;
+
+    ///
+    /// @brief Obtém o ponteiro da instância única do contêiner de quadros.
+    /// @return Ponteiro para a instância única de ContainerQuadros.
+    ///
+    static ContainerQuadros* getInstancia();
 
     ///
     /// @brief Insere um novo quadro associado a um projeto.
@@ -152,12 +227,11 @@ public:
 
     ///
     /// @brief Busca um quadro pelo seu código identificador.
-    // CONFIRMAR NECESSIDADE DE ADICIONAR TAMBÉM O PARÂMETRO QUADRO
     /// @param id Objeto Identificador do quadro.
     /// @param quadro Referência para armazenar o objeto localizado.
     /// @return true se encontrado; false caso contrário.
     ///
-    bool buscarQuadro(const Identificador& id) const;
+    bool buscarQuadro(const Identificador& id, Quadro& quadro) const;
 
     ///
     /// @brief Atualiza as informações de um quadro (como o limite de WIP ou nome).
@@ -167,7 +241,9 @@ public:
     bool atualizarQuadro(const Quadro& quadro);
 
     ///
-    /// @brief Remove um quadro pelo identificador.
+    /// @brief Remove um quadro e o seu vínculo com o projeto.
+    /// @details Não remove os cartões do quadro: essa exclusão é feita pelo serviço, usando
+    ///          ContainerCartoes::removerCartoesPorQuadro.
     /// @param id Objeto Identificador do quadro a ser excluído.
     /// @return true se removido com sucesso; false caso contrário.
     ///
@@ -180,9 +256,63 @@ public:
     ///
     std::vector<Quadro> listarQuadrosPorProjeto(const Identificador& idProjeto) const;
 
-    // =========================================================================
-    // OPERAÇÕES DE CARTÃO DE ATIVIDADE
-    // =========================================================================
+    ///
+    /// @brief remove todos os quadros vinculados a um projeto.
+    /// @details Usado pelo serviço de Projetos na exclusão em cascata.
+    /// @param idProjeto Objeto Identificador do projeto.
+    /// @return Quantidade de quadros removidos.
+    ///
+    int removerQuadrosPorProjeto(const Identificador& idProjeto);
+
+    ///
+    /// @brief verifica se existe um quadro com o identificador informado.
+    /// @details Usado pelo serviço de Cartões para validar o quadro antes de criar um cartão.
+    /// @param id Objeto Identificador do quadro.
+    /// @return true se existir; false caso contrário.
+    ///
+    bool existeQuadro(const Identificador& id) const;
+
+    ///
+    /// @brief recupera o identificador do projeto ao qual um quadro pertence.
+    /// @param idQuadro Identificador do quadro pesquisado.
+    /// @param idProjeto Referência onde será gravado o identificador do projeto.
+    /// @return true se o vínculo for localizado; false caso contrário.
+    ///
+    bool obterProjetoDoQuadro(const Identificador& idQuadro, Identificador& idProjeto) const;
+};
+
+///
+/// @brief Contêiner de dados da entidade CartaoDeAtividade.
+/// @details Armazena em memória a tabela de cartões (std::map), indexada pelo identificador (chave primária),
+///          e o vínculo de chave estrangeira Cartão -> Quadro.
+///
+class ContainerCartoes {
+private:
+    // Instância única para padrão Singleton
+    static ContainerCartoes* instancia;
+
+    // Construtor privado para evitar instanciação direta fora do Singleton
+    ContainerCartoes() = default;
+
+    // --- Tabela de Dados (Chave Primária -> Entidade) ---
+    std::map<std::string, CartaoDeAtividade> tabelaCartoes;          ///< Chave: Identificador (string)
+
+    // --- Mapeamento Relacional de Chave Estrangeira ---
+    std::map<std::string, std::string> vinculoCartaoQuadro;          ///< ID Cartão -> ID Quadro
+
+public:
+    // Destrutor padrão
+    ~ContainerCartoes() = default;
+
+    // Proíbe cópia e atribuição para preservar a unicidade do Singleton
+    ContainerCartoes(const ContainerCartoes&) = delete;
+    ContainerCartoes& operator=(const ContainerCartoes&) = delete;
+
+    ///
+    /// @brief Obtém o ponteiro da instância única do contêiner de cartões.
+    /// @return Ponteiro para a instância única de ContainerCartoes.
+    ///
+    static ContainerCartoes* getInstancia();
 
     ///
     /// @brief Insere um novo cartão de atividade vinculado a um determinado quadro.
@@ -194,12 +324,11 @@ public:
 
     ///
     /// @brief Busca um cartão pelo seu identificador único.
-    // CONFIRMAR NECESSIDADE DE ADICIONAR TAMBÉM O PARÂMETRO CARTÃO 
     /// @param id Objeto Identificador do cartão.
     /// @param cartao Referência para armazenar o objeto localizado.
     /// @return true se encontrado; false caso contrário.
     ///
-    bool buscarCartao(const Identificador& id) const;
+    bool buscarCartao(const Identificador& id, CartaoDeAtividade& cartao) const;
 
     ///
     /// @brief Atualiza os dados de um cartão de atividade.
@@ -223,20 +352,27 @@ public:
     std::vector<CartaoDeAtividade> listarCartoesPorQuadro(const Identificador& idQuadro) const;
 
     ///
-    /// @brief Lista todos os cartões vinculados a uma determinada pessoa, independente de estarem no mesmo projeto.
-    /// @param email Objeto Email da pessoa pesquisada.
-    /// @return Vetor com todos os cartões cadastrados para o usuário informado.
-    ///
-    std::vector<CartaoDeAtividade> listarCartoesPorPessoa(const Email& email) const;
-
-    /// CONFIRMAR NECESSIDADE DESSE MÉTODO
     /// @brief Recupera o identificador do quadro ao qual um cartão pertence.
     /// @param idCartao Identificador do cartão pesquisado.
     /// @param idQuadro Referência onde será gravado o identificador do quadro.
     /// @return true se o vínculo for localizado; false caso contrário.
     ///
-    //bool obterQuadroDoCartao(const Identificador& idCartao, Identificador& idQuadro) const;
+    bool obterQuadroDoCartao(const Identificador& idCartao, Identificador& idQuadro) const;
+
+    ///
+    /// @brief remove todos os cartões vinculados a um quadro.
+    /// @details Usado pelos serviços de Quadros e Projetos na exclusão em cascata.
+    /// @param idQuadro Objeto Identificador do quadro.
+    /// @return Quantidade de cartões removidos.
+    ///
+    int removerCartoesPorQuadro(const Identificador& idQuadro);
+
+    ///
+    /// @brief verifica se existe um cartão com o identificador informado.
+    /// @param id Objeto Identificador do cartão.
+    /// @return true se existir; false caso contrário.
+    ///
+    bool existeCartao(const Identificador& id) const;
 };
 
 #endif // CONTAINERDADOS_HPP_INCLUDED
-
