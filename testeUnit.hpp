@@ -44,4 +44,19 @@ public:
     void executar();
 };
 
+class TUServicoPessoas {
+    private:
+        ServicoPessoas servicoPessoas;
+
+        void TestarCriacaoSucesso();
+        void TestarCriacaoEmailDuplicado();
+        void TestarAutenticacaoSucesso();
+        void TestarAutenticacaoSenhaIncorreta();
+        void TestarAtualizacaoSucesso();
+        void TestarExclusaoSucesso();
+    
+    public:
+        void executar();
+};
+
 #endif // TESTEUNIT_HPP_INCLUDED

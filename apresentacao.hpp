@@ -2,6 +2,8 @@
 #define APRESENTACAO_HPP_INCLUDED 
 #include "interfaces.hpp" 
 #include <string>
+#include <iostream>
+#include <stdexcept>
 
 ///
 /// @brief Controladora de Apresentação para o Módulo de Projetos. 
@@ -76,6 +78,21 @@ class ApresentacaoControle : public IApresentacaoControle {
         /// @brief Inicia o loop principal do sistema (tela inicial, login e menu principal).
         /// @throw std::runtime_error Se algum módulo dependente não tiver sido injetado.
         void executar() override;
+};
+
+class ApresentacaoPessoas : public IApresentacaoPessoas {
+    private: 
+        IServicoPessoas* servicoPessoas;
+    public:
+        ApresentacaoPessoas() : servicoPessoas(nullptr) {}
+
+        void setServico(IServicoPessoas* servico) override { 
+            this->servicoPessoas = servico;
+        }
+
+        bool criarConta() override;
+        void gerenciarConta(Pessoa& usuarioLogado) override;
+        bool executarAutenticação(Pessoa& usuarioRetorno);
 };
 
 

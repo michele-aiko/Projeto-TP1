@@ -397,3 +397,151 @@ void TUApresentacaoControle::executar() {
     testarSessaoAposGerenciarConta();
     std::cout << ">>> TODOS OS TESTES DO CONTROLE PASSARAM COM SUCESSO! <<<\n\n";
 }
+
+void TUServicoPessoas::TestarCriacaoSucesso() {
+    Email email("teste.sucesso@unb.br");
+    Nome nome("Usuario Teste");
+    Senha senha("abc12");
+    Papel papel("GESTOR");
+    Pessoa pessoa(email, nome, senha, papel);
+
+    // Garante que limpa antes de testar
+    ContainerDados::getInstancia()->removerPessoa(email);
+
+    bool resultado = servicoPessoas.criar(pessoa);
+    assert(resultado == true);
+
+    // Limpeza
+    ContainerDados::getInstancia()->removerPessoa(email);
+}
+
+void TUServicoPessoas::TestarCriacaoEmailDuplicado() {
+    Email email("duplicado@unb.br");
+    Nome nome("Usuario Um");
+    Senha senha("abc12");
+    Papel papel("DESENVOLVEDOR");
+    Pessoa pessoa1(email, nome, senha, papel);
+
+    ContainerDados::getInstancia()->removerPessoa(email);
+    servicoPessoas.criar(pessoa1);
+
+    // Tenta criar outra pessoa com o mesmo e-mail (chave primária duplicada)
+    Pessoa pessoa2(email, nome, senha, papel);
+    bool excecaoLancada = false;
+
+    try {
+        servicoPessoas.criar(pessoa2);
+    } catch (const std::runtime_error& e) {
+        excecaoLancada = true;
+    }
+
+    assert(excecaoLancada == true);
+
+    // Limpeza
+    ContainerDados::getInstancia()->removerPessoa(email);
+}
+
+void TUServicoPessoas::TestarAutenticacaoSucesso() {
+    Email email("login@unb.br");
+    Nome nome("Usuario Login");
+    Senha senha("12345");
+    Papel papel("GESTOR");
+    Pessoa pessoa(email, nome, senha, papel);
+
+    ContainerDados::getInstancia()->removerPessoa(email);
+    servicoPessoas.criar(pessoa);
+
+    // Testa o método autenticar com as credenciais corretas
+    bool autenticado = servicoPessoas.autenticar(email, senha);
+    assert(autenticado == true);
+
+    ContainerDados::getInstancia()->removerPessoa(email);
+}
+
+void TUServicoPessoas::TestarAutenticacaoSenhaIncorreta() {
+    Email email("senhaerrada@unb.br");
+    Nome nome("Usuario Senha");
+    Senha senhaCadastrada("abc12");
+    Papel papel("GESTOR");
+    Pessoa pessoa(email, nome, senhaCadastrada, papel);
+
+    ContainerDados::getInstancia()->removerPessoa(email);
+    servicoPessoas.criar(pessoa);
+
+    Senha senhaIncorreta("xyz99");
+    bool excecaoLancada = false;
+
+    try {
+        // Tenta autenticar com senha incorreta (deve lançar exceção)
+        servicoPessoas.autenticar(email, senhaIncorreta);
+    } catch (const std::runtime_error& e) {
+        excecaoLancada = true;
+    }
+
+    assert(excecaoLancada == true);
+
+    ContainerDados::getInstancia()->removerPessoa(email);
+}
+
+void TUServicoPessoas::executar() {
+    std::cout << "[TUServicoPessoas] Iniciando testes de ServicoPessoas..." << std::endl;
+    TestarCriacaoSucesso();
+    TestarCriacaoEmailDuplicado();
+    TestarAutenticacaoSucesso();
+    TestarAutenticacaoSenhaIncorreta();
+    std::cout << "[TUServicoPessoas] Todos os testes passaram com sucesso!\n" << std::endl;
+}
+
+void TUServicoPessoas::TestarAtualizacaoSucesso() {
+    Email email("atualizar@unb.br");
+    Nome nomeAntigo("Nome Antigo");
+    Senha senha("abc12");
+    Papel papel("GESTOR");
+    Pessoa pessoa(email, nomeAntigo, senha, papel);
+
+    // Garante estado limpo e cadastra
+    ContainerDados::getInstancia()->removerPessoa(email);
+    servicoPessoas.criar(pessoa);
+
+    // Prepara os novos dados para atualização
+    Nome nomeNovo("Nome Atualizado");
+    Pessoa pessoaAtualizada(email, nomeNovo, senha, papel);
+
+    // Executa a atualização
+    bool atualizado = servicoPessoas.atualizar(pessoaAtualizada);
+    assert(atualizado == true);
+
+    // Valida se o dado foi realmente alterado lendo do serviço
+    Pessoa pessoaLida;
+    servicoPessoas.ler(email, pessoaLida);
+    assert(pessoaLida.getNome().getNome() == "Nome Atualizado");
+
+    // Limpeza
+    ContainerDados::getInstancia()->removerPessoa(email);
+}
+
+void TUServicoPessoas::TestarExclusaoSucesso() {
+    Email email("excluir@unb.br");
+    Nome nome("Para Excluir");
+    Senha senha("abc12");
+    Papel papel("DESENVOLVEDOR");
+    Pessoa pessoa(email, nome, senha, papel);
+
+    // Garante estado limpo e cadastra
+    ContainerDados::getInstancia()->removerPessoa(email);
+    servicoPessoas.criar(pessoa);
+
+    // Executa a exclusão
+    bool excluido = servicoPessoas.excluir(email);
+    assert(excluido == true);
+
+    // Tenta ler o registro excluído (deve lançar exceção pois não existe mais)
+    bool excecaoLancada = false;
+    Pessoa pessoaTemp;
+    try {
+        servicoPessoas.ler(email, pessoaTemp);
+    } catch (const std::runtime_error& e) {
+        excecaoLancada = true;
+    }
+    assert(excecaoLancada == true);
+}

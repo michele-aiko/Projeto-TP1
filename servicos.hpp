@@ -1,9 +1,12 @@
 #ifndef SERVICOS_HPP_INCLUDED
 #define SERVICOS_HPP_INCLUDED
+#ifndef SERVICOS_PESSOAS_HPP_INCLUDED
+#define SERVICOS_PESSOAS_HPP_INCLUDED
 
 #include "interfaces.hpp"
 #include "containerDados.hpp"
 #include <stdexcept>
+#include <vector>
 
 ///
 /// @brief Implementação dos serviço conforme regras de negócio e persistência para Projetos.
@@ -42,5 +45,31 @@ public:
     std::vector<Projeto> listarTodos() override;
 };
 
+// Na interface abstrata (IServicoPessoas)
+class IServicoPessoas {
+public:
+    virtual ~IServicoPessoas() = default;
+    virtual bool criar(const Pessoa& pessoa) = 0;
+    virtual bool ler(const Email& email, Pessoa& pessoa) = 0;
+    virtual bool atualizar(const Pessoa& pessoa) = 0;
+    virtual bool excluir(const Email& email) = 0;
+    virtual std::vector<Pessoa> listar() = 0;
+    virtual bool autenticar(const Email& email, const Senha& senha) = 0;
+};
+
+// Na classe concreta (ServicoPessoas)
+class ServicoPessoas : public IServicoPessoas {
+public:
+    virtual ~ServicoPessoas() = default;
+
+    bool criar(const Pessoa& pessoa) override;
+    bool ler(const Email& email, Pessoa& pessoa) override;
+    bool atualizar(const Pessoa& pessoa) override;
+    bool excluir(const Email& email) override;
+    std::vector<Pessoa> listar() override;
+    bool autenticar(const Email& email, const Senha& senha) override; 
+};
+
 
 #endif // SERVICOS_HPP_INCLUDED
+#endif // SERVICOS_PESSOAS_HPP_INCLUDED
