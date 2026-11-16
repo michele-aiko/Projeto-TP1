@@ -38,6 +38,12 @@ int main() {
     // 3. Testes (Unitários e Fumaça). Cada módulo acrescenta aqui a chamada dos seus próprios testes.
     TUTesteServicos suiteTestes;
     suiteTestes.executar();
+    TUServicoPessoas testesServicoPessoas;
+    testesServicoPessoas.executar();
+    TUApresentacaoPessoas testesApresentacaoPessoas;
+    testesApresentacaoPessoas.executar();
+    TFumacaPessoas fumacaPessoas;
+    fumacaPessoas.executar(apresentacaoPessoas);
     TUApresentacaoControle testesControle;
     testesControle.executar();
     TFumacaControle fumacaControle;

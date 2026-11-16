@@ -141,3 +141,77 @@ void TFumacaControle::executar(ApresentacaoControle& controle) {
 
     std::cout << ">>> TESTE FUMACA DO CONTROLE CONCLUIDO COM SUCESSO! <<<\n\n";
 }
+
+// =============================================================================
+// TESTE FUMAÇA DO MÓDULO DE PESSOAS (REQUISITOS FUNCIONAIS 1 A 5)
+// =============================================================================
+
+void TFumacaPessoas::executar(ApresentacaoPessoas& apresentacaoPessoas) {
+    std::cout << "\n============================================\n";
+    std::cout << "    EXECUTANDO TESTE FUMACA DE PESSOAS      \n";
+    std::cout << "============================================\n";
+
+    ContainerPessoas* containerPessoas = ContainerPessoas::getInstancia();
+    Email emailTeste("fumaca.pessoa@unb.br");
+    containerPessoas->removerPessoa(emailTeste);
+
+    // Caso de Sucesso RF 1: CRIAR PESSOA via ApresentacaoPessoas -> ServicoPessoas -> ContainerPessoas
+    {
+        CapturaES captura("fumaca.pessoa@unb.br\nPessoa Fumaca\nA1b2c\nDESENVOLVEDOR\n");
+        bool criada = apresentacaoPessoas.criarConta();
+        std::string tela = captura.texto();
+
+        verificar(criada == true, "[RF 1 - Criar Pessoa] criarConta() deve retornar true");
+        verificar(contem(tela, "SUCESSO"), "[RF 1 - Criar Pessoa] deve confirmar cadastro com sucesso");
+
+        Pessoa persistida;
+        verificar(containerPessoas->buscarPessoa(emailTeste, persistida),
+                  "[RF 1 - Criar Pessoa] pessoa deve estar armazenada no ContainerPessoas");
+        std::cout << "  [OK] Fumaca (RF 1 - CRIAR PESSOA): Conta criada e persistida com sucesso.\n";
+    }
+
+    // Casos de Sucesso RF 2 (LER), RF 3 (ATUALIZAR), RF 5 (LISTAR) e RF 4 (EXCLUIR)
+    {
+        Pessoa sessao;
+        containerPessoas->buscarPessoa(emailTeste, sessao);
+
+        // Roteiro no menu gerenciarConta:
+        // 1 -> Ler Dados da Conta (RF 2)
+        // 2 -> Atualizar Dados da Conta para "Pessoa Editada", "Z9y8x", "GESTOR" (RF 3)
+        // 4 -> Listar Pessoas Cadastradas (RF 5)
+        // 3 -> Excluir Minha Conta confirmando com "S" (RF 4)
+        std::string roteiro = "1\n"
+                              "2\nPessoa Editada\nZ9y8x\nGESTOR\n"
+                              "4\n"
+                              "3\nS\n";
+        CapturaES captura(roteiro);
+        apresentacaoPessoas.gerenciarConta(sessao);
+        std::string tela = captura.texto();
+
+        // Verificação RF 2 (LER PESSOA)
+        verificar(contem(tela, "DADOS DA PESSOA") && contem(tela, "Pessoa Fumaca"),
+                  "[RF 2 - Ler Pessoa] deve exibir os dados cadastrais da pessoa");
+        std::cout << "  [OK] Fumaca (RF 2 - LER PESSOA): Dados da conta consultados e exibidos com sucesso.\n";
+
+        // Verificação RF 3 (ATUALIZAR PESSOA)
+        verificar(contem(tela, "Dados da conta atualizados com sucesso"),
+                  "[RF 3 - Atualizar Pessoa] deve confirmar atualizacao cadastral");
+        verificar(sessao.getNome().getNome() == "Pessoa Editada" && sessao.getPapel().getPapel() == Papel::GESTOR,
+                  "[RF 3 - Atualizar Pessoa] sessao deve refletir o novo Nome e Papel");
+        std::cout << "  [OK] Fumaca (RF 3 - ATUALIZAR PESSOA): Nome, Senha e Papel atualizados com sucesso.\n";
+
+        // Verificação RF 5 (LISTAR PESSOA)
+        verificar(contem(tela, "PESSOAS CADASTRADAS") && contem(tela, "fumaca.pessoa@unb.br"),
+                  "[RF 5 - Listar Pessoa] deve listar o identificador (e-mail) das pessoas cadastradas");
+        std::cout << "  [OK] Fumaca (RF 5 - LISTAR PESSOA): Listagem de pessoas exibida com sucesso.\n";
+
+        // Verificação RF 4 (EXCLUIR PESSOA)
+        verificar(contem(tela, "Conta excluida com sucesso"),
+                  "[RF 4 - Excluir Pessoa] deve confirmar a exclusao da conta");
+        verificar(!containerPessoas->existePessoa(emailTeste),
+                  "[RF 4 - Excluir Pessoa] pessoa nao deve mais existir no ContainerPessoas");
+        std::cout << "  [OK] Fumaca (RF 4 - EXCLUIR PESSOA): Conta removida com sucesso.\n";
+    }
+
+    std::cout << ">>> TESTE FUMACA DE PESSOAS CONCLUIDO COM SUCESSO! <<<\n\n";
+}

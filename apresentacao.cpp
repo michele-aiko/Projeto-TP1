@@ -6,6 +6,189 @@
 #include <string>
 
 // =============================================================================
+// APRESENTAÇÃO DE PESSOAS
+// =============================================================================
+
+void ApresentacaoPessoas::validarDependencia() const {
+    if (servico == nullptr) {
+        throw std::runtime_error("Servico de Pessoas indisponivel.");
+    }
+}
+
+int ApresentacaoPessoas::lerOpcao() const {
+    std::string linha;
+    while (std::getline(std::cin, linha)) {
+        if (linha.find_first_not_of(" \t\r") == std::string::npos) continue;
+        try {
+            return std::stoi(linha);
+        } catch (const std::exception&) {
+            return -1;
+        }
+    }
+    return 0;
+}
+
+std::string ApresentacaoPessoas::lerLinha(const std::string& rotulo) const {
+    std::string linha;
+    std::cout << rotulo;
+    while (std::getline(std::cin, linha)) {
+        std::size_t ini = linha.find_first_not_of(" \t\r");
+        if (ini != std::string::npos) {
+            std::size_t fim = linha.find_last_not_of(" \t\r");
+            return linha.substr(ini, fim - ini + 1);
+        }
+    }
+    return "";
+}
+
+bool ApresentacaoPessoas::criarConta() {
+    validarDependencia();
+
+    std::cout << "\n--- CRIAR NOVA CONTA DE USUARIO ---\n";
+    std::string sEmail = lerLinha("E-mail (ex: usuario@dominio.com): ");
+    std::string sNome  = lerLinha("Nome (ate 15 caracteres, apenas letras e espacos): ");
+    std::string sSenha = lerLinha("Senha (5 caracteres alfanumericos, com letra e digito): ");
+    std::string sPapel = lerLinha("Papel (GESTOR ou DESENVOLVEDOR): ");
+
+    try {
+        Email email(sEmail);
+        Nome nome(sNome);
+        Senha senha(sSenha);
+        Papel papel(sPapel);
+
+        Pessoa novaPessoa(email, nome, senha, papel);
+        servico->criar(novaPessoa);
+        std::cout << ">>> SUCESSO: Conta cadastrada com sucesso! <<<\n";
+        return true;
+    } catch (const std::invalid_argument& e) {
+        std::cerr << ">>> ERRO DE ENTRADA (Formato Invalido): " << e.what() << "\n";
+    } catch (const std::runtime_error& e) {
+        std::cerr << ">>> ERRO DE NEGOCIO: " << e.what() << "\n";
+    }
+    return false;
+}
+
+void ApresentacaoPessoas::gerenciarConta(Pessoa& usuarioLogado) {
+    validarDependencia();
+
+    int opcao = -1;
+    do {
+        std::cout << "\n========================================\n";
+        std::cout << "       GERENCIAMENTO DE CONTA           \n";
+        std::cout << " Usuario: " << usuarioLogado.getNome().getNome()
+                  << " | E-mail: " << usuarioLogado.getEmail().getEmail()
+                  << " (" << usuarioLogado.getPapel().getPapel() << ")\n";
+        std::cout << "========================================\n";
+        std::cout << " 1. Ler Dados da Conta\n";
+        std::cout << " 2. Atualizar Dados da Conta (Nome, Senha, Papel)\n";
+        std::cout << " 3. Excluir Minha Conta\n";
+        std::cout << " 4. Listar Pessoas Cadastradas\n";
+        std::cout << " 0. Voltar ao Menu Principal\n";
+        std::cout << " Escolha uma opcao: ";
+        opcao = lerOpcao();
+
+        switch (opcao) {
+            case 1:
+                lerDadosConta(usuarioLogado);
+                break;
+            case 2:
+                atualizarConta(usuarioLogado);
+                break;
+            case 3:
+                if (excluirConta(usuarioLogado)) {
+                    return; // Conta excluída: encerra o menu de gerenciamento
+                }
+                break;
+            case 4:
+                listarPessoas();
+                break;
+            case 0:
+                break;
+            default:
+                std::cout << "Opcao invalida!\n";
+                break;
+        }
+    } while (opcao != 0);
+}
+
+void ApresentacaoPessoas::lerDadosConta(const Pessoa& usuarioLogado) {
+    try {
+        Pessoa lida;
+        if (!servico->ler(usuarioLogado.getEmail(), lida)) {
+            std::cout << "Conta nao encontrada.\n";
+            return;
+        }
+        std::cout << "\n--- DADOS DA PESSOA ---\n";
+        std::cout << "E-mail (PK): " << lida.getEmail().getEmail() << "\n";
+        std::cout << "Nome:        " << lida.getNome().getNome() << "\n";
+        std::cout << "Papel:       " << lida.getPapel().getPapel() << "\n";
+    } catch (const std::runtime_error& e) {
+        std::cerr << ">>> ERRO DE NEGOCIO: " << e.what() << "\n";
+    }
+}
+
+void ApresentacaoPessoas::atualizarConta(Pessoa& usuarioLogado) {
+    std::cout << "\n--- ATUALIZAR DADOS DA CONTA ---\n";
+    std::cout << "(Nota: O e-mail '" << usuarioLogado.getEmail().getEmail()
+              << "' e chave primaria e nao pode ser alterado)\n";
+
+    std::string sNome  = lerLinha("Novo Nome (ate 15 caracteres): ");
+    std::string sSenha = lerLinha("Nova Senha (5 caracteres alfanumericos): ");
+    std::string sPapel = lerLinha("Novo Papel (GESTOR ou DESENVOLVEDOR): ");
+
+    try {
+        Nome novoNome(sNome);
+        Senha novaSenha(sSenha);
+        Papel novoPapel(sPapel);
+
+        // Requisito 13: Não é possível editar dado que identifica entidade (chave primária: Email)
+        Pessoa atualizada(usuarioLogado.getEmail(), novoNome, novaSenha, novoPapel);
+        servico->atualizar(atualizada);
+        usuarioLogado = atualizada;
+        std::cout << ">>> SUCESSO: Dados da conta atualizados com sucesso! <<<\n";
+    } catch (const std::invalid_argument& e) {
+        std::cerr << ">>> ERRO DE ENTRADA (Formato Invalido): " << e.what() << "\n";
+    } catch (const std::runtime_error& e) {
+        std::cerr << ">>> ERRO DE NEGOCIO: " << e.what() << "\n";
+    }
+}
+
+bool ApresentacaoPessoas::excluirConta(const Pessoa& usuarioLogado) {
+    std::cout << "\n--- EXCLUIR MINHA CONTA ---\n";
+    std::string confirmacao = lerLinha("Confirma a exclusao permanente da conta (S/N)? ");
+    if (confirmacao != "S" && confirmacao != "s") {
+        std::cout << "Exclusao cancelada.\n";
+        return false;
+    }
+
+    try {
+        servico->excluir(usuarioLogado.getEmail());
+        std::cout << ">>> SUCESSO: Conta excluida com sucesso! <<<\n";
+        return true;
+    } catch (const std::invalid_argument& e) {
+        std::cerr << ">>> ERRO DE ENTRADA (Formato Invalido): " << e.what() << "\n";
+    } catch (const std::runtime_error& e) {
+        std::cerr << ">>> ERRO DE NEGOCIO: " << e.what() << "\n";
+    }
+    return false;
+}
+
+void ApresentacaoPessoas::listarPessoas() {
+    try {
+        std::vector<Pessoa> lista = servico->listar();
+        std::cout << "\n--- PESSOAS CADASTRADAS (" << lista.size() << ") ---\n";
+        for (const auto& p : lista) {
+            // Requisito 11: Listagem de entidade resulta na apresentação do identificador de cada entidade
+            std::cout << "E-mail: " << p.getEmail().getEmail()
+                      << " | Nome: " << p.getNome().getNome()
+                      << " | Papel: " << p.getPapel().getPapel() << "\n";
+        }
+    } catch (const std::runtime_error& e) {
+        std::cerr << ">>> ERRO DE NEGOCIO: " << e.what() << "\n";
+    }
+}
+
+// =============================================================================
 // APRESENTAÇÃO DE PROJETOS
 // =============================================================================
 

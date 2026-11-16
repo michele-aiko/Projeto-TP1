@@ -397,3 +397,331 @@ void TUApresentacaoControle::executar() {
     testarSessaoAposGerenciarConta();
     std::cout << ">>> TODOS OS TESTES DO CONTROLE PASSARAM COM SUCESSO! <<<\n\n";
 }
+
+// =============================================================================
+// TESTES UNITÁRIOS DO MÓDULO DE PESSOAS
+// =============================================================================
+
+void TUServicoPessoas::testarCriarELerPessoa() {
+    Email email("pessoa.tu@unb.br");
+    ContainerPessoas::getInstancia()->removerPessoa(email);
+
+    Pessoa nova(email, Nome("Maria Silva"), Senha("A1b2c"), Papel(Papel::GESTOR));
+    verificar(servicoPessoas.criar(nova) == true, "criar pessoa inedita deve retornar true");
+    verificar(ContainerPessoas::getInstancia()->existePessoa(email) == true, "existePessoa deve retornar true");
+
+    // Tentativa de criar com o mesmo e-mail (chave primária duplicada) -> std::runtime_error
+    bool lancouDuplicado = false;
+    try {
+        servicoPessoas.criar(nova);
+    } catch (const std::runtime_error&) {
+        lancouDuplicado = true;
+    }
+    verificar(lancouDuplicado, "criar pessoa com e-mail duplicado deve lancar std::runtime_error");
+
+    // Leitura com sucesso
+    Pessoa lida;
+    verificar(servicoPessoas.ler(email, lida) == true, "ler pessoa existente deve retornar true");
+    verificar(lida.getNome().getNome() == "Maria Silva", "nome lido deve corresponder ao cadastrado");
+    verificar(lida.getPapel().getPapel() == Papel::GESTOR, "papel lido deve corresponder ao cadastrado");
+
+    // Leitura de e-mail inexistente -> deve retornar false (sem lancar excecao)
+    Pessoa inexistente;
+    verificar(servicoPessoas.ler(Email("inexistente.tu@unb.br"), inexistente) == false,
+              "ler pessoa inexistente deve retornar false");
+
+    ContainerPessoas::getInstancia()->removerPessoa(email);
+    std::cout << "  [OK] Teste Unitario: ServicoPessoas::criar e ServicoPessoas::ler (sucesso e contrato de retorno).\n";
+}
+
+void TUServicoPessoas::testarAtualizarPessoa() {
+    Email email("atualizar.tu@unb.br");
+    ContainerPessoas::getInstancia()->removerPessoa(email);
+
+    Pessoa original(email, Nome("Joao Original"), Senha("A1b2c"), Papel(Papel::DESENVOLVEDOR));
+    servicoPessoas.criar(original);
+
+    Pessoa alterada(email, Nome("Joao Novo"), Senha("Z9y8x"), Papel(Papel::GESTOR));
+    verificar(servicoPessoas.atualizar(alterada) == true, "atualizar pessoa existente deve retornar true");
+
+    Pessoa conferida;
+    servicoPessoas.ler(email, conferida);
+    verificar(conferida.getNome().getNome() == "Joao Novo", "nome deve ter sido atualizado");
+    verificar(conferida.getSenha().getSenha() == "Z9y8x", "senha deve ter sido atualizada");
+    verificar(conferida.getPapel().getPapel() == Papel::GESTOR, "papel deve ter sido atualizado");
+
+    // Atualizar pessoa inexistente -> std::runtime_error
+    bool lancouInexistente = false;
+    try {
+        Pessoa fantasma(Email("fantasma.tu@unb.br"), Nome("Fantasma"), Senha("A1b2c"), Papel(Papel::GESTOR));
+        servicoPessoas.atualizar(fantasma);
+    } catch (const std::runtime_error&) {
+        lancouInexistente = true;
+    }
+    verificar(lancouInexistente, "atualizar pessoa inexistente deve lancar std::runtime_error");
+
+    // Gestor com projetos vinculados tenta virar DESENVOLVEDOR
+    Email emailGestor("gestor.projetos.tu@unb.br");
+    Identificador idProjVinculado("PRJ789");
+    ContainerProjetos::getInstancia()->removerProjeto(idProjVinculado);
+    ContainerPessoas::getInstancia()->removerPessoa(emailGestor);
+
+    Pessoa gestorProj(emailGestor, Nome("Gestor ComProj"), Senha("A1b2c"), Papel(Papel::GESTOR));
+    servicoPessoas.criar(gestorProj);
+
+    Projeto projVinculado(idProjVinculado, Nome("Proj Gestao"), Texto("Descricao valida."),
+                          Timestamp("01-JAN-2024-10:00"), Timestamp("30-JAN-2024-18:00"));
+    ContainerProjetos::getInstancia()->inserirProjeto(projVinculado, emailGestor);
+
+    bool bloqueouRebaixamento = false;
+    try {
+        Pessoa gestorRebaixado(emailGestor, Nome("Gestor ComProj"), Senha("A1b2c"), Papel(Papel::DESENVOLVEDOR));
+        servicoPessoas.atualizar(gestorRebaixado);
+    } catch (const std::runtime_error&) {
+        bloqueouRebaixamento = true;
+    }
+    verificar(bloqueouRebaixamento, "alterar papel de GESTOR para DESENVOLVEDOR com projetos ativos deve lancar std::runtime_error");
+
+    // Limpeza
+    ContainerProjetos::getInstancia()->removerProjeto(idProjVinculado);
+    ContainerPessoas::getInstancia()->removerPessoa(emailGestor);
+    ContainerPessoas::getInstancia()->removerPessoa(email);
+
+    std::cout << "  [OK] Teste Unitario: ServicoPessoas::atualizar (sucesso, excecao inexistente e integridade gestor->dev).\n";
+}
+
+void TUServicoPessoas::testarListarPessoas() {
+    Email e1("lista1.tu@unb.br");
+    Email e2("lista2.tu@unb.br");
+    ContainerPessoas::getInstancia()->removerPessoa(e1);
+    ContainerPessoas::getInstancia()->removerPessoa(e2);
+
+    servicoPessoas.criar(Pessoa(e1, Nome("Pessoa Um"), Senha("A1b2c"), Papel(Papel::GESTOR)));
+    servicoPessoas.criar(Pessoa(e2, Nome("Pessoa Dois"), Senha("A1b2c"), Papel(Papel::DESENVOLVEDOR)));
+
+    std::vector<Pessoa> lista = servicoPessoas.listar();
+    bool achou1 = false;
+    bool achou2 = false;
+    for (const auto& p : lista) {
+        if (p.getEmail().getEmail() == e1.getEmail()) achou1 = true;
+        if (p.getEmail().getEmail() == e2.getEmail()) achou2 = true;
+    }
+    verificar(achou1 && achou2, "listar() deve retornar todas as pessoas cadastradas");
+
+    ContainerPessoas::getInstancia()->removerPessoa(e1);
+    ContainerPessoas::getInstancia()->removerPessoa(e2);
+    std::cout << "  [OK] Teste Unitario: ServicoPessoas::listar retorna as entidades cadastradas.\n";
+}
+
+void TUServicoPessoas::testarExcluirPessoaEIntegridade() {
+    Email emailGestor("excluir.tu@unb.br");
+    Identificador idProj("PRJ654");
+    ContainerProjetos::getInstancia()->removerProjeto(idProj);
+    ContainerPessoas::getInstancia()->removerPessoa(emailGestor);
+
+    Pessoa gestor(emailGestor, Nome("Gestor Excluir"), Senha("A1b2c"), Papel(Papel::GESTOR));
+    servicoPessoas.criar(gestor);
+
+    // Vincula um projeto ao gestor em ContainerProjetos -> exclusão deve ser bloqueada na camada de serviço (Requisito 15)
+    Projeto proj(idProj, Nome("Proj Vinculo"), Texto("Projeto ativo."),
+                 Timestamp("01-JAN-2024-10:00"), Timestamp("30-JAN-2024-18:00"));
+    ContainerProjetos::getInstancia()->inserirProjeto(proj, emailGestor);
+
+    bool bloqueouPorProjeto = false;
+    try {
+        servicoPessoas.excluir(emailGestor);
+    } catch (const std::runtime_error&) {
+        bloqueouPorProjeto = true;
+    }
+    verificar(bloqueouPorProjeto, "excluir pessoa com projeto vinculado deve lancar std::runtime_error");
+
+    // Remove o projeto vinculado e agora exclui a pessoa com sucesso
+    ContainerProjetos::getInstancia()->removerProjeto(idProj);
+    verificar(servicoPessoas.excluir(emailGestor) == true, "excluir pessoa sem vinculos deve retornar true");
+    verificar(ContainerPessoas::getInstancia()->existePessoa(emailGestor) == false, "existePessoa deve retornar false apos exclusao");
+
+    // Tentar excluir novamente -> std::runtime_error
+    bool lancouInexistente = false;
+    try {
+        servicoPessoas.excluir(emailGestor);
+    } catch (const std::runtime_error&) {
+        lancouInexistente = true;
+    }
+    verificar(lancouInexistente, "excluir pessoa inexistente deve lancar std::runtime_error");
+
+    std::cout << "  [OK] Teste Unitario: ServicoPessoas::excluir e bloqueio de integridade referencial.\n";
+}
+
+void TUServicoPessoas::executar() {
+    std::cout << "\n============================================\n";
+    std::cout << "  EXECUTANDO TESTES UNITARIOS DE PESSOAS    \n";
+    std::cout << "             (CAMADA DE SERVICO)            \n";
+    std::cout << "============================================\n";
+    testarCriarELerPessoa();
+    testarAtualizarPessoa();
+    testarListarPessoas();
+    testarExcluirPessoaEIntegridade();
+    std::cout << ">>> TODOS OS TESTES DE SERVICO DE PESSOAS PASSARAM! <<<\n\n";
+}
+
+namespace {
+
+class MockServicoPessoasCompleto : public IServicoPessoas {
+public:
+    bool falharNegocio = false;
+    int chamadasCriar = 0;
+    int chamadasLer = 0;
+    int chamadasAtualizar = 0;
+    int chamadasExcluir = 0;
+    int chamadasListar = 0;
+    Pessoa ultimaPessoa;
+    std::vector<Pessoa> lista;
+
+    bool criar(const Pessoa& pessoa) override {
+        ++chamadasCriar;
+        if (falharNegocio) throw std::runtime_error("E-mail ja cadastrado.");
+        ultimaPessoa = pessoa;
+        return true;
+    }
+    bool ler(const Email&, Pessoa& pessoa) override {
+        ++chamadasLer;
+        if (falharNegocio) return false;
+        pessoa = ultimaPessoa;
+        return true;
+    }
+    bool atualizar(const Pessoa& pessoa) override {
+        ++chamadasAtualizar;
+        if (falharNegocio) throw std::runtime_error("Falha ao atualizar pessoa.");
+        ultimaPessoa = pessoa;
+        return true;
+    }
+    bool excluir(const Email&) override {
+        ++chamadasExcluir;
+        if (falharNegocio) throw std::runtime_error("Pessoa possui vinculos ativos.");
+        return true;
+    }
+    std::vector<Pessoa> listar() override {
+        ++chamadasListar;
+        return lista;
+    }
+};
+
+} // namespace
+
+void TUApresentacaoPessoas::testarServicoIndisponivel() {
+    ApresentacaoPessoas apresentacao; // setServico não foi chamado (nullptr)
+
+    bool lancouCriar = false;
+    try {
+        apresentacao.criarConta();
+    } catch (const std::runtime_error&) {
+        lancouCriar = true;
+    }
+    verificar(lancouCriar, "criarConta() sem servico injetado deve lancar std::runtime_error");
+
+    bool lancouGerenciar = false;
+    try {
+        Pessoa u(Email("teste@unb.br"), Nome("Teste"), Senha("A1b2c"), Papel(Papel::GESTOR));
+        apresentacao.gerenciarConta(u);
+    } catch (const std::runtime_error&) {
+        lancouGerenciar = true;
+    }
+    verificar(lancouGerenciar, "gerenciarConta() sem servico injetado deve lancar std::runtime_error");
+
+    std::cout << "  [OK] Teste Unitario: ApresentacaoPessoas lanca runtime_error se o servico estiver indisponivel.\n";
+}
+
+void TUApresentacaoPessoas::testarCriarContaValidaEInvalida() {
+    MockServicoPessoasCompleto mock;
+    ApresentacaoPessoas apresentacao;
+    apresentacao.setServico(&mock);
+
+    // 1. Entrada válida -> cria conta e retorna true
+    {
+        CapturaES cap("novo.usuario@unb.br\nAna Clara\nA1b2c\nGESTOR\n");
+        bool ok = apresentacao.criarConta();
+        std::string tela = cap.texto();
+        verificar(ok == true, "criarConta() com dados validos deve retornar true");
+        verificar(mock.chamadasCriar == 1, "servico->criar deve ser chamado uma vez");
+        verificar(contem(tela, "SUCESSO"), "tela deve exibir mensagem de sucesso");
+    }
+
+    // 2. Entrada com formato inválido (senha inválida) -> captura invalid_argument e retorna false
+    {
+        CapturaES cap("novo.usuario@unb.br\nAna Clara\n12345\nGESTOR\n");
+        bool ok = apresentacao.criarConta();
+        std::string tela = cap.texto();
+        verificar(ok == false, "criarConta() com senha sem letras deve retornar false");
+        verificar(mock.chamadasCriar == 1, "servico->criar nao deve ser chamado quando dominio falha");
+        verificar(contem(tela, "ERRO DE ENTRADA"), "tela deve informar erro de formato invalido");
+    }
+
+    // 3. Erro de negócio no serviço (e-mail duplicado) -> captura runtime_error e retorna false
+    {
+        mock.falharNegocio = true;
+        CapturaES cap("novo.usuario@unb.br\nAna Clara\nA1b2c\nGESTOR\n");
+        bool ok = apresentacao.criarConta();
+        std::string tela = cap.texto();
+        verificar(ok == false, "criarConta() quando servico lanca runtime_error deve retornar false");
+        verificar(contem(tela, "ERRO DE NEGOCIO"), "tela deve informar erro de negocio");
+    }
+
+    std::cout << "  [OK] Teste Unitario: ApresentacaoPessoas::criarConta (sucesso, erro de formato e erro de negocio).\n";
+}
+
+void TUApresentacaoPessoas::testarGerenciarContaLerAtualizarListar() {
+    MockServicoPessoasCompleto mock;
+    ApresentacaoPessoas apresentacao;
+    apresentacao.setServico(&mock);
+
+    Pessoa logado(Email("user@unb.br"), Nome("User Antigo"), Senha("A1b2c"), Papel(Papel::DESENVOLVEDOR));
+    mock.ultimaPessoa = logado;
+    mock.lista = { logado };
+
+    // Roteiro: 1 (Ler) -> 2 (Atualizar para "User Novo", "B2c3d", "GESTOR") -> 4 (Listar) -> 0 (Voltar)
+    std::string roteiro = "1\n2\nUser Novo\nB2c3d\nGESTOR\n4\n0\n";
+    CapturaES cap(roteiro);
+    apresentacao.gerenciarConta(logado);
+    std::string tela = cap.texto();
+
+    verificar(mock.chamadasLer == 1, "opcao 1 deve chamar servico->ler");
+    verificar(mock.chamadasAtualizar == 1, "opcao 2 deve chamar servico->atualizar");
+    verificar(mock.chamadasListar == 1, "opcao 4 deve chamar servico->listar");
+    verificar(logado.getNome().getNome() == "User Novo", "objeto usuarioLogado deve ser atualizado em sessao");
+    verificar(logado.getPapel().getPapel() == Papel::GESTOR, "papel do usuarioLogado deve ser atualizado");
+    verificar(contem(tela, "PESSOAS CADASTRADAS (1)"), "listagem deve exibir o total de pessoas");
+    verificar(contem(tela, "user@unb.br"), "listagem deve exibir o identificador (Email) da pessoa");
+
+    std::cout << "  [OK] Teste Unitario: ApresentacaoPessoas::gerenciarConta (Ler, Atualizar e Listar).\n";
+}
+
+void TUApresentacaoPessoas::testarGerenciarContaExcluir() {
+    MockServicoPessoasCompleto mock;
+    ApresentacaoPessoas apresentacao;
+    apresentacao.setServico(&mock);
+
+    Pessoa logado(Email("user@unb.br"), Nome("User Teste"), Senha("A1b2c"), Papel(Papel::GESTOR));
+
+    // Cancela exclusão (N) e depois confirma (S) -> encerra o menu automaticamente após excluir
+    CapturaES cap("3\nN\n3\nS\n");
+    apresentacao.gerenciarConta(logado);
+    std::string tela = cap.texto();
+
+    verificar(contem(tela, "Exclusao cancelada."), "confirmacao N deve cancelar a exclusao");
+    verificar(mock.chamadasExcluir == 1, "confirmacao S deve acionar servico->excluir uma vez");
+    verificar(contem(tela, "Conta excluida com sucesso"), "deve informar sucesso na exclusao da conta");
+
+    std::cout << "  [OK] Teste Unitario: ApresentacaoPessoas::gerenciarConta (Excluir cancelado e confirmado).\n";
+}
+
+void TUApresentacaoPessoas::executar() {
+    std::cout << "\n============================================\n";
+    std::cout << "  EXECUTANDO TESTES UNITARIOS DE PESSOAS    \n";
+    std::cout << "          (CAMADA DE APRESENTACAO)          \n";
+    std::cout << "============================================\n";
+    testarServicoIndisponivel();
+    testarCriarContaValidaEInvalida();
+    testarGerenciarContaLerAtualizarListar();
+    testarGerenciarContaExcluir();
+    std::cout << ">>> TODOS OS TESTES DE APRESENTACAO DE PESSOAS PASSARAM! <<<\n\n";
+}

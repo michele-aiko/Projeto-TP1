@@ -11,10 +11,19 @@ ContainerDados* ContainerDados::getInstancia() {
 }
 
 // =============================================================================
-// OPERAÇÕES DE PESSOA
+// OPERAÇÕES DE PESSOA (ContainerPessoas)
 // =============================================================================
 
-bool ContainerDados::inserirPessoa(const Pessoa& pessoa) {
+ContainerPessoas* ContainerPessoas::instancia = nullptr;
+
+ContainerPessoas* ContainerPessoas::getInstancia() {
+    if (instancia == nullptr) {
+        instancia = new ContainerPessoas();
+    }
+    return instancia;
+}
+
+bool ContainerPessoas::inserirPessoa(const Pessoa& pessoa) {
     // Usa o getter exclusivo do domínio Email: getEmail()
     std::string chave = pessoa.getEmail().getEmail();
 
@@ -27,7 +36,7 @@ bool ContainerDados::inserirPessoa(const Pessoa& pessoa) {
     return true;
 }
 
-bool ContainerDados::buscarPessoa(const Email& email, Pessoa& pessoa) const {
+bool ContainerPessoas::buscarPessoa(const Email& email, Pessoa& pessoa) const {
     std::string chave = email.getEmail();
     auto it = tabelaPessoas.find(chave);
 
@@ -38,7 +47,7 @@ bool ContainerDados::buscarPessoa(const Email& email, Pessoa& pessoa) const {
     return false;
 }
 
-bool ContainerDados::atualizarPessoa(const Pessoa& pessoa) {
+bool ContainerPessoas::atualizarPessoa(const Pessoa& pessoa) {
     std::string chave = pessoa.getEmail().getEmail();
     auto it = tabelaPessoas.find(chave);
 
@@ -49,17 +58,22 @@ bool ContainerDados::atualizarPessoa(const Pessoa& pessoa) {
     return false;
 }
 
-bool ContainerDados::removerPessoa(const Email& email) {
+bool ContainerPessoas::removerPessoa(const Email& email) {
     std::string chave = email.getEmail();
     return (tabelaPessoas.erase(chave) > 0);
 }
 
-std::vector<Pessoa> ContainerDados::listarPessoas() const {
+std::vector<Pessoa> ContainerPessoas::listarPessoas() const {
     std::vector<Pessoa> lista;
     for (const auto& par : tabelaPessoas) {
         lista.push_back(par.second);
     }
     return lista;
+}
+
+bool ContainerPessoas::existePessoa(const Email& email) const {
+    std::string chave = email.getEmail();
+    return (tabelaPessoas.find(chave) != tabelaPessoas.end());
 }
 
 // =============================================================================
@@ -260,4 +274,3 @@ bool ContainerDados::obterQuadroDoCartao(const Identificador& idCartao, Identifi
     }
     return false;
 }
-

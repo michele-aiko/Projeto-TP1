@@ -1,6 +1,66 @@
 #include "servicos.hpp"
 
 // =============================================================================
+// SERVIÇO DE PESSOAS
+// =============================================================================
+
+bool ServicoPessoas::criar(const Pessoa& pessoa) {
+    if (!ContainerPessoas::getInstancia()->inserirPessoa(pessoa)) {
+        throw std::runtime_error("ServicoPessoas: Ja existe uma pessoa cadastrada com o e-mail '" +
+                                 pessoa.getEmail().getEmail() + "'.");
+    }
+    return true;
+}
+
+bool ServicoPessoas::ler(const Email& email, Pessoa& pessoa) {
+    return ContainerPessoas::getInstancia()->buscarPessoa(email, pessoa);
+}
+
+bool ServicoPessoas::atualizar(const Pessoa& pessoa) {
+    Pessoa existente;
+    if (!ContainerPessoas::getInstancia()->buscarPessoa(pessoa.getEmail(), existente)) {
+        throw std::runtime_error("ServicoPessoas: Falha ao atualizar. Pessoa com e-mail '" +
+                                 pessoa.getEmail().getEmail() + "' nao existe.");
+    }
+
+    // Impede alterar papel de gestor para desenvolvedor se houver projetos vinculados
+    if (existente.getPapel().getPapel() == Papel::GESTOR &&
+        pessoa.getPapel().getPapel() == Papel::DESENVOLVEDOR) {
+        std::vector<Projeto> projetosVinculados = ContainerProjetos::getInstancia()->listarProjetosPorGestor(pessoa.getEmail());
+        if (!projetosVinculados.empty()) {
+            throw std::runtime_error("ServicoPessoas: Nao e possivel alterar papel para DESENVOLVEDOR pois o usuario possui projetos vinculados sob sua gestao.");
+        }
+    }
+
+    if (!ContainerPessoas::getInstancia()->atualizarPessoa(pessoa)) {
+        throw std::runtime_error("ServicoPessoas: Falha ao persistir atualizacao da pessoa '" +
+                                 pessoa.getEmail().getEmail() + "'.");
+    }
+    return true;
+}
+
+bool ServicoPessoas::excluir(const Email& email) {
+    if (!ContainerPessoas::getInstancia()->existePessoa(email)) {
+        throw std::runtime_error("ServicoPessoas: Falha ao excluir. Pessoa com e-mail '" +
+                                 email.getEmail() + "' nao localizada.");
+    }
+
+    // Impede a exclusao de gestores com projetos ativos
+    std::vector<Projeto> projetosVinculados = ContainerProjetos::getInstancia()->listarProjetosPorGestor(email);
+    if (!projetosVinculados.empty()) {
+        throw std::runtime_error("ServicoPessoas: Nao e possivel excluir a conta '" + email.getEmail() +
+                                 "' pois possui projetos vinculados sob sua gestao.");
+    }
+
+    ContainerPessoas::getInstancia()->removerPessoa(email);
+    return true;
+}
+
+std::vector<Pessoa> ServicoPessoas::listar() {
+    return ContainerPessoas::getInstancia()->listarPessoas();
+}
+
+// =============================================================================
 // SERVIÇO DE PROJETOS
 // =============================================================================
 
@@ -62,4 +122,3 @@ std::vector<Projeto> ServicoProjetos::listarPorGestor(const Email& emailGestor) 
 std::vector<Projeto> ServicoProjetos::listarTodos() {
     return ContainerDados::getInstancia()->listarTodosProjetos();
 }
-

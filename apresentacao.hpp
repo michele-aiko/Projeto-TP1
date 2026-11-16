@@ -4,6 +4,67 @@
 #include <string>
 
 ///
+/// @brief Controladora de Apresentação para o Módulo de Pessoas (Usuários / Contas).
+/// @details Responsável pela interação textual no console (`std::cin` / `std::cout`) e pela
+///          pré-validação sintática dos dados de entrada (por meio das classes de domínio
+///          `Email`, `Nome`, `Senha` e `Papel`) para os serviços de Criar, Ler, Atualizar,
+///          Excluir e Listar Pessoas (Requisitos Funcionais 1 a 5). Depende exclusivamente da
+///          interface abstrata `IServicoPessoas` e lança `std::runtime_error` caso o serviço
+///          esteja indisponível (`nullptr`).
+///
+class ApresentacaoPessoas : public IApresentacaoPessoas {
+    private:
+        IServicoPessoas* servico = nullptr; ///< Ponteiro abstrato injetado para a camada de serviço de pessoas.
+
+        /// @brief Verifica se o serviço de pessoas foi injetado antes de processar requisições.
+        /// @throw std::runtime_error Se o ponteiro `servico` for `nullptr`.
+        void validarDependencia() const;
+
+        /// @brief Lê uma opção numérica de menu no console.
+        /// @return Inteiro correspondente à opção escolhida, -1 se inválida ou 0 ao fim da entrada.
+        int lerOpcao() const;
+
+        /// @brief Exibe um rótulo e lê uma linha não vazia do console.
+        /// @param rotulo Mensagem exibida ao usuário antes da leitura.
+        /// @return Objeto `std::string` contendo a linha lida.
+        std::string lerLinha(const std::string& rotulo) const;
+
+        /// @brief Exibe os dados cadastrais da conta do usuario autenticado (Requisito 2).
+        /// @param usuarioLogado Referencia para o usuario autenticado.
+        void lerDadosConta(const Pessoa& usuarioLogado);
+
+        /// @brief Atualiza Nome, Senha e Papel mantendo o Email inalterado (Requisito 3).
+        /// @param usuarioLogado Referencia para o usuario autenticado na sessao.
+        void atualizarConta(Pessoa& usuarioLogado);
+
+        /// @brief Solicita confirmação e exclui a conta do usuário autenticado (Requisito 4).
+        /// @param usuarioLogado Referência constante para o usuário autenticado.
+        /// @return `true` se a conta foi excluída com sucesso; `false` caso contrário.
+        bool excluirConta(const Pessoa& usuarioLogado);
+
+        /// @brief Lista todas as pessoas cadastradas apresentando o identificador (Email) de cada entidade (Requisitos 5 e 11).
+        void listarPessoas();
+
+    public:
+        /// @brief Destrutor virtual padrão da classe ApresentacaoPessoas.
+        virtual ~ApresentacaoPessoas() = default;
+
+        /// @brief Executa o formulário interativo de criação de nova conta de usuário (Requisito Funcional 1).
+        /// @return `true` se a conta foi criada com sucesso; `false` se houve erro de validação ou de negócio.
+        /// @throw std::runtime_error Se o serviço `IServicoPessoas` não tiver sido injetado (`nullptr`).
+        bool criarConta() override;
+
+        /// @brief Executa o menu interativo de gerenciamento de conta e consulta de usuários (Requisitos Funcionais 2 a 5).
+        /// @param usuarioLogado Referência para o objeto `Pessoa` autenticado na sessão.
+        /// @throw std::runtime_error Se o serviço `IServicoPessoas` não tiver sido injetado (`nullptr`).
+        void gerenciarConta(Pessoa& usuarioLogado) override;
+
+        /// @brief Vincula a controladora de apresentação à interface de serviço de pessoas.
+        /// @param servico Ponteiro para uma implementação concreta de `IServicoPessoas`.
+        void setServico(IServicoPessoas* servico) override { this->servico = servico; }
+};
+
+///
 /// @brief Controladora de Apresentação para o Módulo de Projetos. 
 /// @details Fornece os menus textuais de console para criar, consultar, listar e editar projetos. 
 /// 
