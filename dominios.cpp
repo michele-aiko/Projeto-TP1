@@ -77,7 +77,7 @@ void Email::validar(const std::string& novoEmail) const {
         throw std::invalid_argument("Email invalido: tamanho excedido para parte local ou dominio.");
     }
 
-    std::string partesEmail[1] = {parteLocal, dominio};
+    std::string partesEmail[] = {parteLocal, dominio};
     for (int p = 0; p < 2; ++p) {
         const std::string& str = partesEmail[p];
         if (str.empty() || str.front() == '.' || str.front() == '-' || str.back() == '.' || str.back() == '-') {
