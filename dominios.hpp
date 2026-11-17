@@ -262,7 +262,7 @@ class Email { //Formato válido: parte-local@dominio
 /// @param Recebe string passada por referência
 /// @throw std::invalid_argument Lançada se a string não atender às regras de validação.
 ///
-            void validar(string); 
+            void validar(const std::string& novoEmail) const;
 
         public:
 ///
