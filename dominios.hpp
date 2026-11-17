@@ -67,8 +67,7 @@ class Estado {
 };
 
 	inline void Estado::validar(const std::string& novoEstado) const {
-	    std::vector<std::string> opcoes = getOpcoes();
-	    
+	    std::vector<std::string> opcoes = getOpcoes();   
 	    // Busca se o valor informado está entre as opções permitidas
 	    if (std::find(opcoes.begin(), opcoes.end(), novoEstado) == opcoes.end()) { //Se find não encontra o elemento procurado, retorna o ponteiro para o final da lista
 	        throw std::invalid_argument("Estado invalido: O valor deve ser 'A FAZER', 'FAZENDO' ou 'FEITO'.");
@@ -182,7 +181,7 @@ class Tamanho {
 		    static std::vector<std::string> getOpcoes()  { return {PEQUENO, MEDIO, GRANDE}; }
 };
 
-	inline void Tamanho::validarTamanho(const std::string& tamanho) const {
+	inline void Tamanho::validar(const std::string& tamanho) const {
 	    std::vector<std::string> opcoes = getOpcoes();
 	
 	    // Busca se o valor informado está presente no vetor de opções permitidas
@@ -370,7 +369,7 @@ public:
     /// @param valorInicial Tipo primitivo int contendo o limite desejado (padrão: 5).
     /// @throw std::invalid_argument Lançada se valorInicial for menor que 1 ou maior que 25.
     ///
-    explicit Limite(int valorInicial = 5) { setValor(valorInicial); }
+    explicit Limite(int valorInicial = 5) { setLimite(valorInicial); }
 
     ///
     /// @brief Atribui e valida a quantidade limite de WIP
@@ -424,7 +423,7 @@ class Papel {
 		/// @param valorInicial Objeto std::string contendo o papel inicial desejado (padrão: "GESTOR"). 
 		/// @throw std::invalid_argument Lançada se valorInicial não for "GESTOR" nem "DESENVOLVEDOR". 
 		/// 
-		explicit Papel(const std::string& valorInicial = GESTOR) { setValor(valorInicial); } 
+		explicit Papel(const std::string& valorInicial = GESTOR) { setPapel(valorInicial); } 
 
 		/// 
 		/// @brief Atribui e valida o papel do participante do projeto
