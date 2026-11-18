@@ -259,14 +259,6 @@ public:
     std::vector<Quadro> listarQuadrosPorProjeto(const Identificador& idProjeto) const;
 
     ///
-    /// @brief remove todos os quadros vinculados a um projeto.
-    /// @details Usado pelo serviço de Projetos na exclusão em cascata.
-    /// @param idProjeto Objeto Identificador do projeto.
-    /// @return Quantidade de quadros removidos.
-    ///
-    int removerQuadrosPorProjeto(const Identificador& idProjeto);
-
-    ///
     /// @brief verifica se existe um quadro com o identificador informado.
     /// @details Usado pelo serviço de Cartões para validar o quadro antes de criar um cartão.
     /// @param id Objeto Identificador do quadro.
@@ -353,12 +345,6 @@ public:
     ///
     std::vector<CartaoDeAtividade> listarCartoesPorQuadro(const Identificador& idQuadro) const;
 
-    /// @brief Lista todos os cartões vinculados a uma determinada pessoa, independente de estarem no mesmo projeto.
-    /// @param email Objeto Email da pessoa pesquisada.
-    /// @return Vetor com todos os cartões cadastrados para o usuário informado.
-    ///
-    std::vector<CartaoDeAtividade> listarCartoesPorPessoa(const Email& email) const;
-
     ///
     /// @brief Recupera o identificador do quadro ao qual um cartão pertence.
     /// @param idCartao Identificador do cartão pesquisado.
@@ -366,14 +352,6 @@ public:
     /// @return true se o vínculo for localizado; false caso contrário.
     ///
     bool obterQuadroDoCartao(const Identificador& idCartao, Identificador& idQuadro) const;
-
-    ///
-    /// @brief remove todos os cartões vinculados a um quadro.
-    /// @details Usado pelos serviços de Quadros e Projetos na exclusão em cascata.
-    /// @param idQuadro Objeto Identificador do quadro.
-    /// @return Quantidade de cartões removidos.
-    ///
-    int removerCartoesPorQuadro(const Identificador& idQuadro);
 
     ///
     /// @brief verifica se existe um cartão com o identificador informado.
