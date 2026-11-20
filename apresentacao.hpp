@@ -83,7 +83,6 @@ class ApresentacaoPessoas : public IApresentacaoPessoas {
         void listarPessoas();
 
     public:
-        /// @brief Destrutor virtual padrão da classe ApresentacaoPessoas.
         virtual ~ApresentacaoPessoas() = default;
 
         /// @brief Executa o formulário interativo de criação de nova conta de usuário (Requisito Funcional 1).
@@ -105,7 +104,6 @@ class ApresentacaoPessoas : public IApresentacaoPessoas {
 /// @brief Controladora de Apresentação para o Módulo de Projetos. 
 /// @details Fornece os menus textuais de console para criar, consultar, listar e editar projetos. 
 /// 
-
 class ApresentacaoProjetos : public IApresentacaoProjetos {
 private:
     IServicoProjetos* servico = nullptr; ///< Ponteiro para a interface de serviço de projetos.
@@ -128,14 +126,15 @@ public:
     /// @param usuarioLogado Dados do usuário conectado na sessão.
     void executar(const Pessoa& usuarioLogado) override;
 
-    /// @brief Injeta o serviço de projetos.
+    /// @brief Disponibiliza o serviço de projetos.
     /// @param servico Ponteiro para a interface IServicoProjetos.
     void setServico(IServicoProjetos* servico) override { this->servico = servico; }
 };
 
 ///
-/// @brief Tela interativa para o Módulo de Quadros e Cartões Kanban.
-/// @details Exibe as colunas Kanban, gerencia quadros e cartões, além de apresentar métricas.
+/// @brief Controladora do Módulo de Quadros e Cartões Kanban.
+/// @details Exibe as colunas Kanban(A FAZER, FAZENDO, FEITO), gerencia quadros e cartões,
+///          além de apresentar métricas dos projetos e quadros.
 ///
 class ApresentacaoQuadros : public IApresentacaoQuadros {
 private:
@@ -165,7 +164,7 @@ private:
 public:
     virtual ~ApresentacaoQuadros() = default;
 
-    /// @brief Renderiza visualmente as colunas e cartões de um quadro Kanban.
+    /// @brief Apresenta as colunas e cartões de um quadro Kanban.
     /// @param idQuadro Identificador do quadro a ser exibido.
     /// @param usuarioLogado Dados do usuário autenticado.
     void exibirQuadro(const Identificador& idQuadro, const Pessoa& usuarioLogado) override;
@@ -175,7 +174,7 @@ public:
     /// @param usuarioLogado Dados do usuário autenticado.
     void gerenciarQuadros(const Identificador& idProjeto, const Pessoa& usuarioLogado) override;
 
-    /// @brief Injeta o serviço de quadros.
+    /// @brief Disponibiliza o serviço de quadros.
     /// @param servico Ponteiro para a interface IServicoQuadros.
     void setServico(IServicoQuadros* servico) override { this->servico = servico; }
 };
@@ -187,7 +186,6 @@ public:
 ///          interfaces abstratas. Antes de executar, verifica se todos os módulos dependentes estão disponíveis
 ///          e lança std::runtime_error caso contrário.
 ///
-
 class ApresentacaoControle : public IApresentacaoControle {
     private:
         IApresentacaoAutenticacao* apresentacaoAutenticacao = nullptr; ///< Tela de login (Módulo 2).
@@ -202,10 +200,13 @@ class ApresentacaoControle : public IApresentacaoControle {
         /// @throw std::runtime_error Se algum módulo dependente estiver indisponível (se qualquer ponteiro for nulo).
         void validarDependencias() const;
 
+        /// @brief Executa uma ação de menu tratando exceções capturadas para evitar interrupções no programa. 
+        /// @param acao Função lambda contendo o fluxo a ser executado com tratamento de erros. 
+        void executarSeguro(const std::function<void()>& acao) const;
+
         /// @brief Lê uma opção numérica de menu. Retorna -1 se a entrada não for número e 0 se a entrada acabar.
         /// @return Número inteiro da opção selecionada.
         int lerOpcao() const;
-
         
         /// @brief Lê uma linha de texto não vazia do teclado.
         /// @param rotulo Texto de instrução para o usuário.
