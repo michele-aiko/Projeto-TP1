@@ -149,8 +149,7 @@ public:
     ///
     /// @brief Remove um projeto e o seu vínculo com o gestor.
     /// @details Não remove os quadros nem os cartões do projeto: essa exclusão em cascata é feita
-    ///          pelo serviço, usando ContainerQuadros::removerQuadrosPorProjeto e
-    ///          ContainerCartoes::removerCartoesPorQuadro.
+    ///          pelo serviço, usando ContainerQuadros::listarQuadrosPorProjeto e ContainerQuadros::excluirQuadros.
     /// @param id Objeto Identificador do projeto a ser excluído.
     /// @return true se removido com sucesso; false se inexistente.
     ///
@@ -245,7 +244,7 @@ public:
     ///
     /// @brief Remove um quadro e o seu vínculo com o projeto.
     /// @details Não remove os cartões do quadro: essa exclusão é feita pelo serviço, usando
-    ///          ContainerCartoes::removerCartoesPorQuadro.
+    ///          ContainerCartoes::listarCartoesPorQuadro e ContainerCartoes::removerCartoes.
     /// @param id Objeto Identificador do quadro a ser excluído.
     /// @return true se removido com sucesso; false caso contrário.
     ///
