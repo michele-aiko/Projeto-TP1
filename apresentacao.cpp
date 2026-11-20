@@ -462,3 +462,163 @@ void ApresentacaoControle::excluirProjeto(const Pessoa& usuarioLogado) {
     }
 }
 
+bool ApresentacaoPessoas::criarConta() {
+    std::string strEmail, strNome, strSenha, strPapel;
+
+    std::cout << "\n=== CADASTRO DE NOVA CONTA ===" << std::endl;
+
+    std::cout << "Digite o E-mail: ";
+    std::cin >> strEmail;
+
+    std::cout << "Digite o Nome completo: ";
+    std::cin.ignore();
+    std::getline(std::cin, strNome);
+
+    std::cout << "Digite a Senha (5 caracteres alfanuméricos): ";
+    std::cin >> strSenha;
+    
+    std::cout << "Digite o Papel (GESTOR ou DESENVOLVEDOR): ";
+    std::cin >> strPapel;
+
+    try {
+        // Instanciação e validação através dos construtores dos domínios e entidade
+        Email email(strEmail);
+        Nome nome(strNome);
+        Senha senha(strSenha);
+        Papel papel(strPapel);
+
+        Pessoa novaPessoa(email, nome, senha, papel);
+
+        // Chama o serviço para persistir
+        if (servicoPessoas && servicoPessoas->criar(novaPessoa)) {
+            std::cout << "\n[Sucesso] Conta cadastrada com sucesso!" << std::endl;
+            return true;
+        }
+    } catch (const std::exception& e) {
+        std::cout << "\n[Erro de Validação/Negócio]: " << e.what() << std::endl;
+        return false;
+    }
+
+    return false;
+
+}
+
+bool ApresentacaoPessoas::executarAutenticação(Pessoa& usuarioRetorno) {
+    std::string strEmail, strSenha;
+
+    std::cout << "\n=== TELA DE LOGIN ===" << std::endl;
+    std::cout << "E-mail: ";
+    std::cin >> strEmail;
+    std::cout << "Senha: ";
+    std::cin >> strSenha;
+
+    try {
+        Email email(strEmail);
+        Senha senha(strSenha);
+
+        // Como a interface IServicoPessoas padrão foca em CRUD, 
+        // podemos usar o método ler para buscar a pessoa e checar a senha localmente,
+        // ou chamar o serviço de autenticação se houver um método específico.
+        if (servicoPessoas && servicoPessoas->ler(email, usuarioRetorno)) {
+            if (usuarioRetorno.getSenha().getSenha() == senha.getSenha()) {
+                std::cout << "\n[Sucesso] Login realizado com sucesso! Bem-vindo, " 
+                          << usuarioRetorno.getNome().getNome() << " (" << usuarioRetorno.getPapel().getPapel() << ")." << std::endl;
+                return true;
+            } else {
+                std::cout << "\n[Erro]: Senha incorreta." << std::endl;
+                return false;
+            }
+        }
+    } catch (const std::exception& e) {
+        std::cout << "\n[Erro]: " << e.what() << std::endl;
+        return false;
+    }
+
+    return false;
+}
+
+void ApresentacaoPessoas::gerenciarConta(Pessoa& usuarioLogado) {
+    int opcao = 0;
+    do {
+        std::cout << "\n=== GERENCIAMENTO DE CONTA ===" << std::endl;
+        std::cout << "1. Visualizar Dados" << std::endl;
+        std::cout << "2. Alterar Dados" << std::endl;
+        std::cout << "3. Excluir Conta" << std::endl;
+        std::cout << "0. Sair / Voltar" << std::endl;
+        std::cout << "Escolha uma opção: ";
+        std::cin >> opcao;
+
+        if (std::cin.fail()) {
+            std::cin.clear();
+            std::cin.ignore(10000, '\n');
+            std::cout << "Opção inválida." << std::endl;
+            continue;
+        }
+
+        switch (opcao) {
+            case 1:
+                std::cout << "\n--- SEU PERFIL ---" << std::endl;
+                std::cout << "E-mail: " << usuarioLogado.getEmail().getEmail() << std::endl;
+                std::cout << "Nome:   " << usuarioLogado.getNome().getNome() << std::endl;
+                std::cout << "Papel:  " << usuarioLogado.getPapel().getPapel() << std::endl;
+                break;
+            case 2: {
+                std::string novoNome, novaSenha, novoPapel;
+                std::cout << "\n=== ATUALIZAR CADASTRO ===" << std::endl;
+                
+                std::cout << "Digite o novo Nome: ";
+                std::cin.ignore();
+                std::getline(std::cin, novoNome);
+                
+                std::cout << "Digite a nova Senha (5 caracteres alfanuméricos): ";
+                std::cin >> novaSenha;
+                
+                std::cout << "Digite o novo Papel (GESTOR ou DESENVOLVEDOR): ";
+                std::cin >> novoPapel;
+
+                try {
+                    // Instancia e valida os novos domínios
+                    Nome nome(novoNome);
+                    Senha senha(novaSenha);
+                    Papel papel(novoPapel);
+
+                    // Cria o objeto Pessoa atualizado, preservando o e-mail original (chave primária)
+                    Pessoa pessoaAtualizada(usuarioLogado.getEmail(), nome, senha, papel);
+
+                    // Envia para o serviço atualizar na persistência
+                    if (servicoPessoas && servicoPessoas->atualizar(pessoaAtualizada)) {
+                        // Atualiza o objeto na sessão atual do usuário logado
+                        usuarioLogado.setNome(nome);
+                        usuarioLogado.setSenha(senha);
+                        usuarioLogado.setPapel(papel);
+                        std::cout << "\n[Sucesso] Informações atualizadas com sucesso!" << std::endl;
+                    }
+                } catch (const std::exception& e) {
+                    std::cout << "\n[Erro de Validação/Atualização]: " << e.what() << std::endl;
+                }
+                break;
+            }
+            case 3: {
+                char confirmacao;
+                std::cout << "Tem certeza que deseja excluir sua conta? (s/n): ";
+                std::cin >> confirmacao;
+                if (confirmacao == 's' || confirmacao == 'S') {
+                    try {
+                        if (servicoPessoas && servicoPessoas->excluir(usuarioLogado.getEmail())) {
+                            std::cout << "Conta excluída com sucesso." << std::endl;
+                            return; // Encerra o gerenciamento após exclusão
+                        }
+                    } catch (const std::exception& e) {
+                        std::cout << "Erro ao excluir: " << e.what() << std::endl;
+                    }
+                }
+                break;
+            }
+            case 0:
+                break;
+            default:
+                std::cout << "Opção inválida!" << std::endl;
+        }
+    } while (opcao != 0);
+}
+

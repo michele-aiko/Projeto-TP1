@@ -48,6 +48,8 @@ int main() {
     testesControle.executar();
     TFumacaControle fumacaControle;
     fumacaControle.executar(apresentacaoControle);
+    TUServicoPessoas testesServicoPessoas;
+    testesServicoPessoas.executar();
 
     // 4. Execução do sistema (tela inicial, login e menu principal)
     try {
