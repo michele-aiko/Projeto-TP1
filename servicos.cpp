@@ -88,7 +88,7 @@ std::vector<Pessoa> ServicoPessoas::listar() {
 
 bool ServicoProjetos::criar(const Projeto& projeto, const Email& emailGestor) {
     Pessoa gestor;
-    if (!ContainerDados::getInstancia()->buscarPessoa(emailGestor, gestor)) {
+    if (!ContainerPessoas::getInstancia()->buscarPessoa(emailGestor, gestor)) {
         throw std::runtime_error("ServicoProjetos: Gestor responsavel nao encontrado no sistema.");
     }
 
@@ -98,7 +98,7 @@ bool ServicoProjetos::criar(const Projeto& projeto, const Email& emailGestor) {
     }
 
     // Verificação de existência de projeto com o identificador informado
-    if (!ContainerDados::getInstancia()->inserirProjeto(projeto, emailGestor)) {
+    if (!ContainerProjetos::getInstancia()->inserirProjeto(projeto, emailGestor)) {
         throw std::runtime_error("ServicoProjetos: Ja existe um projeto cadastrado com o identificador '" +
                                  projeto.getIdentificador().getIdentificador() + "'.");
     }
@@ -111,7 +111,7 @@ bool ServicoProjetos::ler(const Identificador& id, Projeto& projeto) {
 }
 
 bool ServicoProjetos::atualizar(const Projeto& projeto) {
-    if (!ContainerDados::getInstancia()->atualizarProjeto(projeto)) {
+    if (!ContainerProjetos::getInstancia()->atualizarProjeto(projeto)) {
         throw std::runtime_error("ServicoProjetos: Falha ao atualizar. Projeto '" +
                                  projeto.getIdentificador().getIdentificador() + "' nao existe.");
     }
@@ -134,11 +134,11 @@ bool ServicoProjetos::excluir(const Identificador& id) {
 }
 
 std::vector<Projeto> ServicoProjetos::listarPorGestor(const Email& emailGestor) {
-    return ContainerDados::getInstancia()->listarProjetosPorGestor(emailGestor);
+    return ContainerProjetos::getInstancia()->listarProjetosPorGestor(emailGestor);
 }
 
 std::vector<Projeto> ServicoProjetos::listarTodos() {
-    return ContainerDados::getInstancia()->listarTodosProjetos();
+    return ContainerProjetos::getInstancia()->listarTodosProjetos();
 }
 
 
@@ -159,27 +159,31 @@ int ServicoQuadros::numeroDoMes(const std::string& mes) {
     return 0; // O domínio Timestamp já validou a sigla; este caso não ocorre.
 }
 
+//Método para converter uma data e hora no formato de texto (`"01-JAN-2024-14:30"`) em valor absoluto de minutos inteiros, considera datas desde 1º de janeiro de 2000.
+//Com essa conversão, calcular o Tempo de Ciclo ou Lead Time entre duas datas é feito por subtração simples de dois números inteiros (minutosFim - minutosInicio).
 long ServicoQuadros::emMinutos(const Timestamp& momento) {
     static const int DIAS_NO_MES[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    const std::string t = momento.getTimeStamp(); // formato DIA-MES-ANO-HH:MM
-    const std::size_t p1 = t.find('-');
-    const std::size_t p2 = t.find('-', p1 + 1);
-    const std::size_t p3 = t.find('-', p2 + 1);
+    const std::string textoData = momento.getTimeStamp(); // formato DIA-MES-ANO-HH:MM
+    //Identificação das posições dos hífens que separam dia, mês, ano e horas
+    const std::size_t posDia = textoData.find('-');
+    const std::size_t posMes = textoData.find('-', posDia + 1);
+    const std::size_t posAno = textoData.find('-', posMes + 1);
 
-    const int dia = std::stoi(t.substr(0, p1));
-    const int mes = numeroDoMes(t.substr(p1 + 1, p2 - p1 - 1));
-    const int ano = std::stoi(t.substr(p2 + 1, p3 - p2 - 1));
-    const int hora = std::stoi(t.substr(p3 + 1, 2));
-    const int minuto = std::stoi(t.substr(p3 + 4, 2));
+    const int dia = std::stoi(textoData.substr(0, posDia));
+    const int mes = numeroDoMes(textoData.substr(posDia + 1, posMes - posDia - 1));
+    const int ano = std::stoi(textoData.substr(posMes + 1, posAno - posMes - 1));
+    const int hora = std::stoi(textoData.substr(posAno + 1, 2));
+    const int minuto = std::stoi(textoData.substr(posAno + 4, 2));
 
-    long dias = 0;
-    for (int a = 2000; a < ano; ++a) dias += ehBissexto(a) ? 366 : 365;
-    for (int m = 0; m < mes; ++m) {
-        dias += DIAS_NO_MES[m];
-        if (m == 1 && ehBissexto(ano)) dias += 1; 
+    long totalDias = 0;
+    for (int i = 2000; i < ano; ++i) totalDias += ehBissexto(i) ? 366 : 365;
+    for (int j = 0; j < mes; ++j) {
+        totalDias += DIAS_NO_MES[j];
+        if (j == 1 && ehBissexto(ano)) totalDias += 1; 
     }
-    dias += dia - 1;
-    return dias * 24L * 60L + hora * 60L + minuto;
+    totalDias += dia - 1;
+    //O sufixo `L` nos números avisa o compilador C++ para realizar todas as multiplicações usando o tipo `long`
+    return totalDias * 24L * 60L + hora * 60L + minuto;
 }
 
 int ServicoQuadros::contarEmFazendo(const Identificador& idQuadro) const {
@@ -341,23 +345,26 @@ bool ServicoQuadros::moverCartao(const Identificador& idCartao, const Estado& no
     }
 
     // Regra do WIP: só pode entrar em FAZENDO se WIP atual < limite WIP
-    if (iniciando) {
-        Identificador idQuadro;
-        Quadro quadro;
-        if (!cartoes->obterQuadroDoCartao(idCartao, idQuadro) ||
-            !ContainerQuadros::getInstancia()->buscarQuadro(idQuadro, quadro)) {
-            throw std::runtime_error("ServicoQuadros: Quadro do cartao '" + idCartao.getIdentificador() + "' nao encontrado.");
-        }
-        if (contarEmFazendo(idQuadro) >= quadro.getLimite().getLimite()) {
-            throw std::runtime_error("ServicoQuadros: Limite de WIP atingido. Conclua um cartao em FAZENDO antes de iniciar outro.");
-        }
-        cartao.setInicio(momentoTransicao);
-    } else {
-        cartao.setTermino(momentoTransicao);
-    }
-
-    cartao.setEstado(novoEstado);
-    cartoes->atualizarCartao(cartao);
+    if (iniciando) { 
+        Identificador idQuadro; 
+        Quadro quadro; 
+        
+        if (!ContainerCartoes::getInstancia()->obterQuadroDoCartao(idCartao, idQuadro) || !ContainerQuadros::getInstancia()->buscarQuadro(idQuadro, quadro)) { 
+            throw std::runtime_error("ServicoQuadros: Quadro do cartao '" + idCartao.getIdentificador() + "' nao encontrado."); 
+        } 
+        
+        if (contarEmFazendo(idQuadro) >= quadro.getLimite().getLimite()) { 
+            throw std::runtime_error("ServicoQuadros: Limite de WIP atingido. Conclua um cartao em FAZENDO antes de iniciar outro."); 
+        } 
+        
+        cartao.setInicio(momentoTransicao); 
+    
+    } else { 
+        cartao.setTermino(momentoTransicao); 
+    } 
+    
+    cartao.setEstado(novoEstado); 
+    ContainerCartoes::getInstancia()->atualizarCartao(cartao); 
     return true;
 }
 
