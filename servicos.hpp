@@ -158,6 +158,43 @@ public:
 ///
 // Requisitos 11 a 26
 class ServicoQuadros : public IServicoQuadros {
+private:
+    /// @brief Informa se um ano é bissexto (usado no cálculo de datas).
+    /// @param ano Ano com quatro dígitos.
+    /// @return true se o ano for bissexto.
+    static bool ehBissexto(int ano);
+
+    /// @brief Converte a sigla de um mês ("JAN" a "DEZ") em número de 0 a 11.
+    /// @param mes Sigla do mês, já validada pelo domínio Timestamp.
+    /// @return Número do mês (JAN = 0).
+    static int numeroDoMes(const std::string& mes);
+
+    /// @brief Converte um Timestamp em minutos corridos desde 01-JAN-2000-00:00.
+    /// @details Permite subtrair dois instantes para obter uma duração em minutos.
+    /// @param momento Data e hora a converter.
+    /// @return Quantidade de minutos desde 01-JAN-2000-00:00.
+    static long emMinutos(const Timestamp& momento);
+
+    /// @brief Conta os cartões do quadro que estão na coluna FAZENDO (o WIP).
+    /// @param idQuadro Identificador do quadro.
+    /// @return Quantidade de cartões em FAZENDO.
+    int contarEmFazendo(const Identificador& idQuadro) const;
+
+    /// @brief Garante que o quadro existe.
+    /// @param idQuadro Identificador do quadro.
+    /// @throw std::runtime_error Se o quadro não existir.
+    void exigirQuadro(const Identificador& idQuadro) const;
+
+    /// @brief Busca um cartão e garante que ele já está concluído (FEITO).
+    /// @param idCartao Identificador do cartão.
+    /// @return Cópia do cartão encontrado.
+    /// @throw std::runtime_error Se o cartão não existir ou não estiver em FEITO.
+    CartaoDeAtividade exigirCartaoConcluido(const Identificador& idCartao) const;
+
+    /// @brief Remove todos os cartões de um quadro (parte da exclusão em cascata).
+    /// @param idQuadro Identificador do quadro.
+    void removerCartoesDoQuadro(const Identificador& idQuadro) const;
+
 public:
     virtual ~ServicoQuadros() = default;
 
