@@ -77,3 +77,4 @@ public:
 };
 
 #endif // TESTEFUMACA_HPP_INCLUDED
+
