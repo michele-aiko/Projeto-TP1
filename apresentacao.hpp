@@ -1,5 +1,5 @@
-#ifndef APRESENTACAO_HPP_INCLUDED 
-#define APRESENTACAO_HPP_INCLUDED 
+#ifndef APRESENTACAO_HPP_INCLUDED
+#define APRESENTACAO_HPP_INCLUDED
 #include "interfaces.hpp"
 #include "dominios.hpp"
 #include "entidades.hpp"
@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <functional>
 
 ///
 /// @brief Controladora da Apresentação para o Módulo de Autenticação de Usuários.
@@ -101,12 +102,25 @@ class ApresentacaoPessoas : public IApresentacaoPessoas {
 };
 
 ///
-/// @brief Controladora de Apresentação para o Módulo de Projetos. 
-/// @details Fornece os menus textuais de console para criar, consultar, listar e editar projetos. 
-/// 
+/// @brief Controladora de Apresentação para o Módulo de Projetos.
+/// @details Fornece os menus textuais de console para criar, consultar, listar e editar projetos.
+///
 class ApresentacaoProjetos : public IApresentacaoProjetos {
 private:
     IServicoProjetos* servico = nullptr; ///< Ponteiro para a interface de serviço de projetos.
+
+    /// @brief Garante que o serviço de projetos está disponível antes de executar requisições.
+    /// @throw std::runtime_error Se servico for nullptr.
+    void validarDependencia() const;
+
+    /// @brief Lê uma opção numérica de menu no console.
+    /// @return Inteiro correspondente à opção escolhida, -1 se inválida ou 0 ao fim da entrada.
+    int lerOpcao() const;
+
+    /// @brief Lê uma linha de texto do teclado.
+    /// @param rotulo Texto exibido ao usuário.
+    /// @return String digitada.
+    std::string lerLinha(const std::string& rotulo) const;
 
     /// @brief Auxiliar para capturar dados e criar um novo projeto (exclusivo para GESTOR).
     /// @param usuarioLogado Dados do usuário autenticado.
@@ -139,6 +153,14 @@ public:
 class ApresentacaoQuadros : public IApresentacaoQuadros {
 private:
     IServicoQuadros* servico = nullptr; ///< Ponteiro para a interface de serviço de quadros.
+
+    /// @brief Garante que o serviço de quadros está disponível antes de executar requisições.
+    /// @throw std::runtime_error Se servico for nullptr.
+    void validarDependencia() const;
+
+    /// @brief Lê uma opção numérica de menu no console.
+    /// @return Inteiro correspondente à opção escolhida, -1 se inválida ou 0 ao fim da entrada.
+    int lerOpcao() const;
 
     /// @brief Lê uma linha de texto do teclado.
     /// @param rotulo Texto exibido ao usuário.
@@ -200,29 +222,29 @@ class ApresentacaoControle : public IApresentacaoControle {
         /// @throw std::runtime_error Se algum módulo dependente estiver indisponível (se qualquer ponteiro for nulo).
         void validarDependencias() const;
 
-        /// @brief Executa uma ação de menu tratando exceções capturadas para evitar interrupções no programa. 
-        /// @param acao Função lambda contendo o fluxo a ser executado com tratamento de erros. 
+        /// @brief Executa uma ação de menu tratando exceções capturadas para evitar interrupções no programa.
+        /// @param acao Função lambda contendo o fluxo a ser executado com tratamento de erros.
         void executarSeguro(const std::function<void()>& acao) const;
 
         /// @brief Lê uma opção numérica de menu. Retorna -1 se a entrada não for número e 0 se a entrada acabar.
         /// @return Número inteiro da opção selecionada.
         int lerOpcao() const;
-        
+
         /// @brief Lê uma linha de texto não vazia do teclado.
         /// @param rotulo Texto de instrução para o usuário.
         /// @return String digitada.
         std::string lerLinha(const std::string& rotulo) const;
 
         /// @brief Exibe o menu inicial de boas-vindas (Criar conta, Entrar, Sair).
-        void menuInicial();                               
+        void menuInicial();
 
         /// @brief Exibe o menu principal do sistema para o usuário autenticado.
         /// @param usuarioLogado Referência dos dados do usuário logado na sessão.
-        void menuPrincipal(Pessoa& usuarioLogado);        
+        void menuPrincipal(Pessoa& usuarioLogado);
 
         /// @brief Permite escolher um projeto e abrir o seu quadro Kanban.
         /// @param usuarioLogado Dados do usuário autenticado.
-        void abrirQuadro(const Pessoa& usuarioLogado);    
+        void abrirQuadro(const Pessoa& usuarioLogado);
 
         /// @brief Solicita confirmação e exclui um projeto do sistema (exclusivo para GESTOR).
         /// @param usuarioLogado Dados do usuário autenticado.
@@ -260,3 +282,4 @@ class ApresentacaoControle : public IApresentacaoControle {
 
 
 #endif // APRESENTACAO_HPP_INCLUDED
+
