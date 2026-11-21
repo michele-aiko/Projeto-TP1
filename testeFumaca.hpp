@@ -4,19 +4,17 @@
 #include "apresentacao.hpp"
 
 ///
-/// @file testeFumaca.hpp
 /// @brief Declara os testes fumaça (smoke tests) do sistema Kanban.
 /// @details Teste fumaça roda o sistema integrado (Apresentação -> Serviço -> Contêiner) e verifica se
-///          as funcionalidades principais funcionam em um caso de sucesso. Juntas, as classes abaixo
-///          cobrem os 26 requisitos funcionais da especificação (TP1-TRABALHO).
+///          as funcionalidades principais funcionam em um caso de sucesso.
 ///          Em caso de falha, a mensagem é mostrada e o programa termina com `std::exit(1)`.
 ///
 
 ///
 /// @brief Teste fumaça do Módulo de Inicialização e Controle.
 /// @details Usa a controladora ligada aos módulos REAIS e simula o teclado com um roteiro de entradas.
-///          Cobre: criar conta e login (Requisitos 1 e autenticação), listagem de projetos (10), abertura de
-///          quadros (15), exclusão de projeto em cascata (9 e 15), logout, bloqueio de permissão do
+///          Cobre: criar conta e login, listagem de projetos, abertura de quadros,
+///          exclusão de projeto em cascata, logout, bloqueio de permissão do
 ///          DESENVOLVEDOR e login recusado.
 ///
 class TFumacaControle {
@@ -29,10 +27,11 @@ public:
 };
 
 ///
-/// @brief Teste fumaça do Módulo de Pessoas (Requisitos Funcionais 1 a 5).
+/// @brief Teste fumaça do Módulo de Pessoas.
 /// @details Executa um caso de sucesso para cada funcionalidade: Criar, Ler, Atualizar, Listar e
 ///          Excluir Pessoa, todas pela tela de Pessoas.
 ///
+// Requisitos Funcionais 1 a 5
 class TFumacaPessoas {
 public:
     ///
@@ -43,10 +42,11 @@ public:
 };
 
 ///
-/// @brief Teste fumaça do Módulo de Projetos (Requisitos Funcionais 6 a 10).
+/// @brief Teste fumaça do Módulo de Projetos.
 /// @details Criar e Listar passam pela tela de Projetos. Ler, Atualizar e Excluir ainda não têm menu na
 ///          tela e são executados diretamente pela interface de serviço (comentado no código).
 ///
+// Requisitos Funcionais 6 a 10
 class TFumacaProjetos {
 public:
     ///
@@ -58,12 +58,13 @@ public:
 };
 
 ///
-/// @brief Teste fumaça do Módulo de Quadros e Cartões (Requisitos Funcionais 11 a 26).
+/// @brief Teste fumaça do Módulo de Quadros e Cartões.
 /// @details Usa a tela de Quadros para criar/listar quadros, criar cartões, mover cartões (inclusive o
 ///          bloqueio por limite de WIP) e ver as métricas médias. As demais funcionalidades (ler,
 ///          atualizar e excluir quadro e cartão, tempo de ciclo e lead time por cartão) são executadas
 ///          pela interface de serviço.
 ///
+// Requisitos Funcionais 11 a 26
 class TFumacaQuadros {
 public:
     ///
