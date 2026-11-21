@@ -6,6 +6,50 @@
 #include <string>
 
 // =============================================================================
+// MÓDULO DE AUTENTICAÇÃO (ApresentacaoAutenticacao)
+// =============================================================================
+
+void ApresentacaoAutenticacao::validarDependencia() const {
+    if (servico == nullptr) {
+        throw std::runtime_error("Servico de Autenticacao indisponivel.");
+    }
+}
+
+std::string ApresentacaoAutenticacao::lerLinha(const std::string& rotulo) const {
+    std::string linha;
+    std::cout << rotulo;
+    std::cin >> linha;
+    return linha;
+}
+
+bool ApresentacaoAutenticacao::autenticar(Pessoa& usuario) {
+    validarDependencia();
+    std::cout << "\n=== TELA DE LOGIN ===" << std::endl;
+    std::string sEmail = lerLinha("E-mail: ");
+    std::string sSenha = lerLinha("Senha: ");
+
+    try {
+        Email email(sEmail);
+        Senha senha(sSenha);
+        if (servicoPessoas && servicoPessoas->ler(email, usuario)) {
+            if (usuario.getSenha().getSenha() == senha.getSenha()) {
+                std::cout << "\n[Sucesso] Login realizado com sucesso! Bem-vindo, " 
+                          << usuario.getNome().getNome() << " (" << usuario.getPapel().getPapel() << ")." << std::endl;
+                return true;
+            } else {
+                std::cout << "\n[Erro]: Senha incorreta." << std::endl;
+                return false;
+            }
+        }
+    } catch (const std::exception& e) {
+        std::cout << "\n[Erro]: " << e.what() << std::endl;
+        return false;
+    }
+
+        return false;
+    }
+
+// =============================================================================
 // APRESENTAÇÃO DE PESSOAS
 // =============================================================================
 
@@ -251,8 +295,8 @@ void ApresentacaoProjetos::criarProjeto(const Pessoa& usuarioLogado) {
     std::cout << "Nome (ate 15 chars): "; std::cin >> sNome;
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cout << "Descricao (ate 30 chars com ponto final): "; std::getline(std::cin, sDesc);
-    std::cout << "Inicio (ex: 01-JAN-2024-10:00): "; std::cin >> sIni;
-    std::cout << "Termino (ex: 30-JUN-2024-18:00): "; std::cin >> sFim;
+    std::cout << "Inicio (ex: 01-JAN-2026-10:00): "; std::cin >> sIni;
+    std::cout << "Termino (ex: 30-JUN-2026-18:00): "; std::cin >> sFim;
 
     try {
         // Validação sintática dos Domínios
@@ -276,21 +320,6 @@ void ApresentacaoProjetos::criarProjeto(const Pessoa& usuarioLogado) {
 // APRESENTAÇÃO DE INICIALIZAÇÃO E CONTROLE
 // =============================================================================
 
-namespace {
-// Executa uma ação de tela e traduz as exceções em mensagens para o usuário.
-void executarSeguro(const std::function<void()>& acao) {
-    try {
-        acao();
-    } catch (const std::invalid_argument& e) {
-        std::cerr << ">>> ERRO DE ENTRADA (Formato Invalido): " << e.what() << "\n";
-    } catch (const std::logic_error& e) {
-        std::cerr << ">>> ERRO DE PERMISSAO: " << e.what() << "\n";
-    } catch (const std::runtime_error& e) {
-        std::cerr << ">>> ERRO DE NEGOCIO: " << e.what() << "\n";
-    }
-}
-} // namespace
-
 void ApresentacaoControle::validarDependencias() const {
     if (apresentacaoAutenticacao == nullptr) throw std::runtime_error("Modulo de Autenticacao (apresentacao) indisponivel.");
     if (apresentacaoPessoas == nullptr)      throw std::runtime_error("Modulo de Pessoas (apresentacao) indisponivel.");
@@ -299,6 +328,19 @@ void ApresentacaoControle::validarDependencias() const {
     if (servicoPessoas == nullptr)           throw std::runtime_error("Servico de Pessoas indisponivel.");
     if (servicoProjetos == nullptr)          throw std::runtime_error("Servico de Projetos indisponivel.");
     if (servicoQuadros == nullptr)           throw std::runtime_error("Servico de Quadros indisponivel.");
+}
+
+// Executa uma ação de tela e traduz as exceções em mensagens para o usuário.
+void ApresentacaoControle::executarSeguro(const std::function<void()>& acao) const {
+    try {
+        acao();
+    } catch (const std::invalid_argument& e) {
+        std::cerr << "\n>>> ERRO DE ENTRADA (Formato Invalido): " << e.what() << "\n";
+    } catch (const std::logic_error& e) {
+        std::cerr << "\n>>> ERRO DE PERMISSAO: " << e.what() << "\n";
+    } catch (const std::runtime_error& e) {
+        std::cerr << "\n>>> ERRO DE NEGOCIO: " << e.what() << "\n";
+    }
 }
 
 int ApresentacaoControle::lerOpcao() const {
@@ -354,7 +396,7 @@ void ApresentacaoControle::menuInicial() {
                     if (apresentacaoAutenticacao->autenticar(usuario)) {
                         menuPrincipal(usuario);
                     } else {
-                        std::cout << ">>> Login nao realizado. <<<\n";
+                        std::cout << ">>> Login nao realizado. E-mail ou senha incorretos. <<<\n";
                     }
                 });
                 break;
@@ -376,7 +418,7 @@ void ApresentacaoControle::menuPrincipal(Pessoa& usuarioLogado) {
                   << " (" << usuarioLogado.getPapel().getPapel() << ")\n";
         std::cout << "========================================\n";
         std::cout << "1. Abrir Menu de Projetos\n";
-        std::cout << "2. Abrir Quadro Kanban\n";
+        std::cout << "2. Gerenciar e Abrir Quadros Kanban\n";
         if (gestor) {
             std::cout << "3. Excluir Projeto\n";
         }
@@ -406,7 +448,7 @@ void ApresentacaoControle::menuPrincipal(Pessoa& usuarioLogado) {
                 bool existe = false;
                 executarSeguro([&]() { existe = servicoPessoas->ler(usuarioLogado.getEmail(), atualizada); });
                 if (!existe) {
-                    std::cout << ">>> Conta nao existe mais. Sessao encerrada. <<<\n";
+                    std::cout << ">>> Sessao encerrada: a conta foi excluida. <<<\n";
                     return;
                 }
                 usuarioLogado = atualizada;
@@ -419,29 +461,28 @@ void ApresentacaoControle::menuPrincipal(Pessoa& usuarioLogado) {
 }
 
 void ApresentacaoControle::abrirQuadro(const Pessoa& usuarioLogado) {
-    Identificador idProjeto(lerLinha("ID do projeto (ex: PRJ001): "));
+    auto projetos = servicoProjetos->listarTodos();
+
+    if (projetos.empty()) {
+        std::cout << "Nenhum projeto cadastrado no sistema.\n";
+        return;
+    }
+
+    std::cout << "\n--- PROJETOS CADASTRADOS ---\n";
+    for (const auto& p : projetos) {
+        std::cout << "ID: " << p.getIdentificador().getIdentificador()
+                  << " | Nome: " << p.getNome().getNome() << "\n";
+    }
+
+    Identificador idProjeto(lerLinha("Digite o ID do projeto (ex: PRJ001) para exibir seus quadros: "));
 
     Projeto projeto;
     if (!servicoProjetos->ler(idProjeto, projeto)) {
         std::cout << "Projeto nao encontrado.\n";
         return;
     }
-
-    std::vector<Quadro> quadros = servicoQuadros->listarQuadrosPorProjeto(idProjeto);
-    std::cout << "\n--- QUADROS DO PROJETO " << projeto.getIdentificador().getIdentificador()
-              << " (" << quadros.size() << ") ---\n";
-    for (const auto& q : quadros) {
-        std::cout << "ID: " << q.getIdentificador().getIdentificador()
-                  << " | Nome: " << q.getNome().getNome()
-                  << " | Limite WIP: " << q.getLimite().getLimite() << "\n";
-    }
-    if (quadros.empty()) {
-        std::cout << "Este projeto ainda nao possui quadros.\n";
-        return;
-    }
-
-    Identificador idQuadro(lerLinha("ID do quadro (ex: QDR001): "));
-    apresentacaoQuadros->exibirQuadro(idQuadro, usuarioLogado);
+    
+    apresentacaoQuadros->gerenciarQuadros(idProjeto, usuarioLogado);
 }
 
 void ApresentacaoControle::excluirProjeto(const Pessoa& usuarioLogado) {
@@ -449,11 +490,12 @@ void ApresentacaoControle::excluirProjeto(const Pessoa& usuarioLogado) {
         std::cout << "Apenas gestores podem excluir projetos!\n";
         return;
     }
-    Identificador idProjeto(lerLinha("ID do projeto a excluir (ex: PRJ001): "));
-    std::string confirmacao = lerLinha("Confirma a exclusao (S/N)? ");
+    
+    Identificador idProjeto(lerLinha("ID do projeto a ser excluido (ex: PRJ001): "));
+    std::string confirmacao = lerLinha("Tem certeza que deseja excluir o projeto e TODOS os seus quadros e cartoes (S/N)? ");
     if (confirmacao == "S" || confirmacao == "s") {
         if (servicoProjetos->excluir(idProjeto)) {
-            std::cout << ">>> SUCESSO: Projeto excluido com sucesso! <<<\n";
+            std::cout << ">>> SUCESSO: Projeto e seus quadros excluidos em cascata com sucesso! <<<\n";
         } else {
             std::cout << "Projeto nao encontrado.\n";
         }
@@ -462,163 +504,196 @@ void ApresentacaoControle::excluirProjeto(const Pessoa& usuarioLogado) {
     }
 }
 
-bool ApresentacaoPessoas::criarConta() {
-    std::string strEmail, strNome, strSenha, strPapel;
+// =============================================================================
+// MÓDULO DE QUADROS KANBAN (ApresentacaoQuadros)
+// =============================================================================
 
-    std::cout << "\n=== CADASTRO DE NOVA CONTA ===" << std::endl;
-
-    std::cout << "Digite o E-mail: ";
-    std::cin >> strEmail;
-
-    std::cout << "Digite o Nome completo: ";
-    std::cin.ignore();
-    std::getline(std::cin, strNome);
-
-    std::cout << "Digite a Senha (5 caracteres alfanuméricos): ";
-    std::cin >> strSenha;
-    
-    std::cout << "Digite o Papel (GESTOR ou DESENVOLVEDOR): ";
-    std::cin >> strPapel;
-
-    try {
-        // Instanciação e validação através dos construtores dos domínios e entidade
-        Email email(strEmail);
-        Nome nome(strNome);
-        Senha senha(strSenha);
-        Papel papel(strPapel);
-
-        Pessoa novaPessoa(email, nome, senha, papel);
-
-        // Chama o serviço para persistir
-        if (servicoPessoas && servicoPessoas->criar(novaPessoa)) {
-            std::cout << "\n[Sucesso] Conta cadastrada com sucesso!" << std::endl;
-            return true;
-        }
-    } catch (const std::exception& e) {
-        std::cout << "\n[Erro de Validação/Negócio]: " << e.what() << std::endl;
-        return false;
-    }
-
-    return false;
-
+std::string ApresentacaoQuadros::lerLinha(const std::string& rotulo) const {
+    std::string linha;
+    std::cout << rotulo;
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::getline(std::cin, linha);
+    return linha;
 }
 
-bool ApresentacaoPessoas::executarAutenticação(Pessoa& usuarioRetorno) {
-    std::string strEmail, strSenha;
-
-    std::cout << "\n=== TELA DE LOGIN ===" << std::endl;
-    std::cout << "E-mail: ";
-    std::cin >> strEmail;
-    std::cout << "Senha: ";
-    std::cin >> strSenha;
-
-    try {
-        Email email(strEmail);
-        Senha senha(strSenha);
-
-        // Como a interface IServicoPessoas padrão foca em CRUD, 
-        // podemos usar o método ler para buscar a pessoa e checar a senha localmente,
-        // ou chamar o serviço de autenticação se houver um método específico.
-        if (servicoPessoas && servicoPessoas->ler(email, usuarioRetorno)) {
-            if (usuarioRetorno.getSenha().getSenha() == senha.getSenha()) {
-                std::cout << "\n[Sucesso] Login realizado com sucesso! Bem-vindo, " 
-                          << usuarioRetorno.getNome().getNome() << " (" << usuarioRetorno.getPapel().getPapel() << ")." << std::endl;
-                return true;
-            } else {
-                std::cout << "\n[Erro]: Senha incorreta." << std::endl;
-                return false;
-            }
-        }
-    } catch (const std::exception& e) {
-        std::cout << "\n[Erro]: " << e.what() << std::endl;
-        return false;
-    }
-
-    return false;
-}
-
-void ApresentacaoPessoas::gerenciarConta(Pessoa& usuarioLogado) {
-    int opcao = 0;
+void ApresentacaoQuadros::gerenciarQuadros(const Identificador& idProjeto, const Pessoa& usuarioLogado) {
+    int opcao = -1;
     do {
-        std::cout << "\n=== GERENCIAMENTO DE CONTA ===" << std::endl;
-        std::cout << "1. Visualizar Dados" << std::endl;
-        std::cout << "2. Alterar Dados" << std::endl;
-        std::cout << "3. Excluir Conta" << std::endl;
-        std::cout << "0. Sair / Voltar" << std::endl;
-        std::cout << "Escolha uma opção: ";
+        auto quadros = servico->listarQuadrosPorProjeto(idProjeto);
+        std::cout << "\n========================================\n";
+        std::cout << "      GERENCIAMENTO DE QUADROS          \n";
+        std::cout << "========================================\n";
+        std::cout << " 1. Listar e Visualizar Quadro\n";
+        if (usuarioLogado.getPapel().getPapel() == Papel::GESTOR) {
+            std::cout << " 2. Criar Novo Quadro no Projeto\n";
+        }
+        std::cout << " 0. Voltar ao Menu Principal\n";
+        std::cout << " Escolha uma opcao: ";
         std::cin >> opcao;
 
-        if (std::cin.fail()) {
-            std::cin.clear();
-            std::cin.ignore(10000, '\n');
-            std::cout << "Opção inválida." << std::endl;
-            continue;
-        }
-
         switch (opcao) {
-            case 1:
-                std::cout << "\n--- SEU PERFIL ---" << std::endl;
-                std::cout << "E-mail: " << usuarioLogado.getEmail().getEmail() << std::endl;
-                std::cout << "Nome:   " << usuarioLogado.getNome().getNome() << std::endl;
-                std::cout << "Papel:  " << usuarioLogado.getPapel().getPapel() << std::endl;
-                break;
-            case 2: {
-                std::string novoNome, novaSenha, novoPapel;
-                std::cout << "\n=== ATUALIZAR CADASTRO ===" << std::endl;
-                
-                std::cout << "Digite o novo Nome: ";
-                std::cin.ignore();
-                std::getline(std::cin, novoNome);
-                
-                std::cout << "Digite a nova Senha (5 caracteres alfanuméricos): ";
-                std::cin >> novaSenha;
-                
-                std::cout << "Digite o novo Papel (GESTOR ou DESENVOLVEDOR): ";
-                std::cin >> novoPapel;
-
-                try {
-                    // Instancia e valida os novos domínios
-                    Nome nome(novoNome);
-                    Senha senha(novaSenha);
-                    Papel papel(novoPapel);
-
-                    // Cria o objeto Pessoa atualizado, preservando o e-mail original (chave primária)
-                    Pessoa pessoaAtualizada(usuarioLogado.getEmail(), nome, senha, papel);
-
-                    // Envia para o serviço atualizar na persistência
-                    if (servicoPessoas && servicoPessoas->atualizar(pessoaAtualizada)) {
-                        // Atualiza o objeto na sessão atual do usuário logado
-                        usuarioLogado.setNome(nome);
-                        usuarioLogado.setSenha(senha);
-                        usuarioLogado.setPapel(papel);
-                        std::cout << "\n[Sucesso] Informações atualizadas com sucesso!" << std::endl;
-                    }
-                } catch (const std::exception& e) {
-                    std::cout << "\n[Erro de Validação/Atualização]: " << e.what() << std::endl;
+            case 1: {
+                if (quadros.empty()) {
+                    std::cout << "Nenhum quadro cadastrado neste projeto.\n";
+                    break;
                 }
+                std::cout << "\n--- QUADROS DISPONIVEIS ---\n";
+                for (const auto& q : quadros) {
+                    std::cout << "ID: " << q.getIdentificador().getIdentificador()
+                              << " | Nome: " << q.getNome().getNome() << "\n";
+                }
+                std::string sIdQuadro;
+                std::cout << "Digite o ID do Quadro que deseja abrir: ";
+                std::cin >> sIdQuadro;
+                exibirQuadro(Identificador(sIdQuadro), usuarioLogado);
                 break;
             }
-            case 3: {
-                char confirmacao;
-                std::cout << "Tem certeza que deseja excluir sua conta? (s/n): ";
-                std::cin >> confirmacao;
-                if (confirmacao == 's' || confirmacao == 'S') {
-                    try {
-                        if (servicoPessoas && servicoPessoas->excluir(usuarioLogado.getEmail())) {
-                            std::cout << "Conta excluída com sucesso." << std::endl;
-                            return; // Encerra o gerenciamento após exclusão
-                        }
-                    } catch (const std::exception& e) {
-                        std::cout << "Erro ao excluir: " << e.what() << std::endl;
-                    }
+            case 2:
+                if (usuarioLogado.getPapel().getPapel() == Papel::GESTOR) {
+                    criarQuadro(idProjeto);
                 }
                 break;
-            }
-            case 0:
-                break;
-            default:
-                std::cout << "Opção inválida!" << std::endl;
+            case 0: break;
+            default: std::cout << "Opcao invalida!\n"; break;
         }
     } while (opcao != 0);
+}
+
+void ApresentacaoQuadros::criarQuadro(const Identificador& idProjeto) {
+    std::string sId, sNome;
+    int nLimite;
+    std::cout << "\n--- CRIAR NOVO QUADRO KANBAN ---\n";
+    std::cout << "ID do Quadro (ex: QDR001): "; std::cin >> sId;
+    std::cout << "Nome do Quadro (ate 15 chars): "; std::cin >> sNome;
+    std::cout << "Limite de WIP para coluna FAZENDO (1 a 25): "; std::cin >> nLimite;
+
+    try {
+        Quadro novo(Identificador(sId), Nome(sNome), Limite(nLimite));
+        servico->criarQuadro(novo, idProjeto);
+        std::cout << ">>> SUCESSO: Quadro criado com sucesso! <<<\n";
+    } catch (const std::invalid_argument& e) {
+        std::cerr << ">>> ERRO DE FORMATO: " << e.what() << "\n";
+    } catch (const std::runtime_error& e) {
+        std::cerr << ">>> ERRO DE NEGOCIO: " << e.what() << "\n";
+    }
+}
+
+void ApresentacaoQuadros::exibirQuadro(const Identificador& idQuadro, const Pessoa& usuarioLogado) {
+    Quadro q;
+    try {
+        if (!servico->lerQuadro(idQuadro, q)) {
+            std::cout << "Quadro nao encontrado.\n";
+            return;
+        }
+    } catch (const std::runtime_error& e) {
+        std::cerr << ">>> ERRO: " << e.what() << "\n";
+        return;
+    }
+
+    int opcao = -1;
+    do {
+        auto cartoes = servico->listarCartoesPorQuadro(idQuadro);
+        int wipAtual = servico->lerWip(idQuadro);
+
+        std::cout << "\n=================================================================\n";
+        std::cout << " QUADRO: " << q.getNome().getNome() << " [ID: " << q.getIdentificador().getIdentificador() << "]\n";
+        std::cout << " LIMITE DE WIP (FAZENDO): " << wipAtual << " / " << q.getLimite().getLimite() << "\n";
+        std::cout << "=================================================================\n";
+
+        std::cout << "\n[ A FAZER ]\n";
+        for (const auto& c : cartoes) {
+            if (c.getEstado().getEstado() == Estado::A_FAZER) {
+                std::cout << "  - [" << c.getIdentificador().getIdentificador() << "] " << c.getNome().getNome()
+                          << " (Prioridade: " << c.getPrioridade().getPrioridade() << ")\n";
+            }
+        }
+
+        std::cout << "\n[ FAZENDO ]\n";
+        for (const auto& c : cartoes) {
+            if (c.getEstado().getEstado() == Estado::FAZENDO) {
+                std::cout << "  - [" << c.getIdentificador().getIdentificador() << "] " << c.getNome().getNome()
+                          << " (Prioridade: " << c.getPrioridade().getPrioridade() << ")\n";
+            }
+        }
+
+        std::cout << "\n[ FEITO ]\n";
+        for (const auto& c : cartoes) {
+            if (c.getEstado().getEstado() == Estado::FEITO) {
+                std::cout << "  - [" << c.getIdentificador().getIdentificador() << "] " << c.getNome().getNome() << "\n";
+            }
+        }
+
+        std::cout << "\n-----------------------------------------------------------------\n";
+        std::cout << " 1. Mover Cartao de Coluna\n";
+        if (usuarioLogado.getPapel().getPapel() == Papel::GESTOR) {
+            std::cout << " 2. Adicionar Novo Cartao\n";
+        }
+        std::cout << " 3. Consultar Metricas Kanban (Lead Time e Cycle Time)\n";
+        std::cout << " 0. Voltar ao Menu de Quadros\n";
+        std::cout << " Escolha uma opcao: ";
+        std::cin >> opcao;
+
+        switch (opcao) {
+            case 1: moverCartao(idQuadro); break;
+            case 2:
+                if (usuarioLogado.getPapel().getPapel() == Papel::GESTOR) {
+                    adicionarCartao(idQuadro);
+                }
+                break;
+            case 3: exibirMetricas(idQuadro); break;
+            case 0: break;
+            default: std::cout << "Opcao invalida!\n"; break;
+        }
+    } while (opcao != 0);
+}
+
+void ApresentacaoQuadros::moverCartao(const Identificador& idQuadro) {
+    std::string sId, sEstado, sHora;
+    std::cout << "ID do cartao a mover (ex: ACT001): "; std::cin >> sId;
+    std::cout << "Novo Estado ('FAZENDO' ou 'FEITO'): "; std::cin >> sEstado;
+    std::cout << "Timestamp da transicao (ex: 03-NOV-2024-15:00): "; std::cin >> sHora;
+
+    try {
+        servico->moverCartao(Identificador(sId), Estado(sEstado), Timestamp(sHora));
+        std::cout << ">>> SUCESSO: Cartao movimentado com sucesso! <<<\n";
+    } catch (const std::invalid_argument& e) {
+        std::cerr << ">>> ERRO DE FORMATO: " << e.what() << "\n";
+    } catch (const std::runtime_error& e) {
+        std::cerr << ">>> BLOQUEIO DE REGRA OPERACIONAL (WIP / Transicao): " << e.what() << "\n";
+    }
+}
+
+void ApresentacaoQuadros::adicionarCartao(const Identificador& idQuadro) {
+    std::string id, nome, desc, prio, tam, stamp;
+    std::cout << "ID do Cartao (ex: ACT001): "; std::cin >> id;
+    std::cout << "Nome (ate 15 chars): "; std::cin >> nome;
+    std::cout << "Prioridade ('ALTA', 'MEDIA' ou 'BAIXA'): "; std::cin >> prio;
+    std::cout << "Tamanho ('PEQUENO', 'MEDIO' ou 'GRANDE'): "; std::cin >> tam;
+    std::cout << "Timestamp de Criacao (ex: 01-NOV-2024-09:00): "; std::cin >> stamp;
+
+    try {
+        Texto descPadrao("Descricao inicial.");
+        CartaoDeAtividade cartao(Identificador(id), Nome(nome), descPadrao,
+                                 Prioridade(prio), Estado(Estado::A_FAZER), Tamanho(tam),
+                                 Timestamp(stamp), Timestamp(stamp), Timestamp(stamp));
+
+        servico->criarCartao(cartao, idQuadro);
+        std::cout << ">>> SUCESSO: Cartao inserido na coluna A FAZER! <<<\n";
+    } catch (const std::invalid_argument& e) {
+        std::cerr << ">>> ERRO DE FORMATO: " << e.what() << "\n";
+    } catch (const std::runtime_error& e) {
+        std::cerr << ">>> ERRO DE NEGOCIO: " << e.what() << "\n";
+    }
+}
+
+void ApresentacaoQuadros::exibirMetricas(const Identificador& idQuadro) {
+    try {
+        std::cout << "\n--- METRICAS DE DESEMPENHO KANBAN ---\n";
+        std::cout << "WIP Atual: " << servico->lerWip(idQuadro) << " tarefa(s) em andamento.\n";
+        std::cout << "Tempo de Ciclo Medio: " << servico->lerTempoDeCicloMedio(idQuadro) << " minuto(s).\n";
+        std::cout << "Lead Time Medio: " << servico->lerLeadTimeMedio(idQuadro) << " minuto(s).\n";
+    } catch (const std::runtime_error& e) {
+        std::cerr << ">>> ERRO AO LER METRICAS: " << e.what() << "\n";
+    }
 }
 
