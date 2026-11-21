@@ -196,3 +196,4 @@ public:
 };
 
 #endif // ENTIDADES_HPP_INCLUDED
+
