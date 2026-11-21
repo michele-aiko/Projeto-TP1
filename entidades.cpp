@@ -28,3 +28,4 @@ CartaoDeAtividade::CartaoDeAtividade(const Identificador& identificador, const N
       prioridade(prioridade), estado(estado), tamanho(tamanho),
       entrada(entrada), inicio(inicio), termino(termino) {
 }
+
