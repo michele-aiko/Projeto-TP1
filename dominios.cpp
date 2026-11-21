@@ -2,6 +2,7 @@
 #include <cctype>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 
 // =============================================================================
 // METODOS DA CLASSE TEXTO
@@ -20,7 +21,7 @@ void Texto::validar(const std::string& texto) const {
     for (std::size_t i = 0; i < texto.length(); ++i) {
         char c = texto[i];
         bool ehPontuacao = (c == ',' || c == ';' || c == '.' || c == ':' || c == '?' || c == '!');
-        
+
         if (!std::isalnum(static_cast<unsigned char>(c)) && c != ' ' && !ehPontuacao) {
             throw std::invalid_argument("Texto invalido: contem caractere nao permitido.");
         }
@@ -190,11 +191,38 @@ int Timestamp::obterDiasNoMes(const std::string& mes, int ano) const {
     return 0;
 }
 
-void Timestamp::validar(const std::string& timestamp) const {
-    if (timestamp.length() < 15 || timestamp.length() > 16) {
+
+void Timestamp::validar(const std::string& timestampBruta) const {
+    // 1. REmoção de caracteres invisíveis (\r, \n) e espaços do início e do fim
+    std::string timestamp = timestampBruta;
+    while (!timestamp.empty() && (timestamp.back() == '\r' || timestamp.back() == '\n' || timestamp.back() == ' ')) {
+        timestamp.pop_back();
+    }
+    std::size_t inicio = 0;
+    while (inicio < timestamp.length() && timestamp[inicio] == ' ') {
+        inicio++;
+    }
+    if (inicio > 0) {
+        timestamp = timestamp.substr(inicio);
+    }
+
+    // 2. Remove espaços acidentais ao redor dos hífens (ex: "01- JAN-2026-10:00" -> "01-JAN-2026-10:00")
+    std::string temp = "";
+    for (std::size_t i = 0; i < timestamp.length(); ++i) {
+        if (timestamp[i] == ' ') {
+            bool juntoAHifen = (i > 0 && timestamp[i-1] == '-') || (i + 1 < timestamp.length() && timestamp[i+1] == '-');
+            if (juntoAHifen) continue; // ignora espaços colados em hífens
+        }
+        temp += timestamp[i];
+    }
+    timestamp = temp;
+
+    // 3. Validação do comprimento total (16 chars para dia de 1 dígito; 17 chars para dia de 2 dígitos)
+    if (timestamp.length() < 16 || timestamp.length() > 17) {
         throw std::invalid_argument("Timestamp invalido: tamanho incorreto.");
     }
 
+    // 4. Localização dos delimitadores '-'
     std::size_t primeiroHifen = timestamp.find('-');
     if (primeiroHifen == std::string::npos || primeiroHifen < 1 || primeiroHifen > 2) {
         throw std::invalid_argument("Timestamp invalido: delimitador do dia incorreto.");
@@ -212,15 +240,16 @@ void Timestamp::validar(const std::string& timestamp) const {
 
     std::size_t terceiroHifen = timestamp.find('-', segundoHifen + 1);
     if (terceiroHifen == std::string::npos) {
-        throw std::invalid_argument("Timestamp invalido: delimitador do ano incorreto.");
+        throw std::invalid_argument("Timestamp invalido: delimitador do ano/horario incorreto.");
     }
     std::string strAno = timestamp.substr(segundoHifen + 1, terceiroHifen - (segundoHifen + 1));
     if (strAno.length() != 4) {
         throw std::invalid_argument("Timestamp invalido: o ano deve conter exatamente 4 digitos.");
     }
 
+    // 5. Validação do Horário (HH:MM)
     std::string strHorario = timestamp.substr(terceiroHifen + 1);
-    if (strHorario.length() != 5 || strHorario[1] != ':') {
+    if (strHorario.length() != 5 || strHorario[2] != ':') {
         throw std::invalid_argument("Timestamp invalido: horario deve estar no formato HH:MM.");
     }
 
@@ -261,3 +290,5 @@ void Timestamp::validar(const std::string& timestamp) const {
         throw std::invalid_argument("Timestamp invalido: horario fora da faixa permitida (00:00 a 23:59).");
     }
 }
+
+
