@@ -148,4 +148,208 @@ public:
     std::vector<Projeto> listarTodos() override;
 };
 
+///
+/// @brief IMplementação dos serviços do Módulo de Quadros.
+/// @details Realiza a interface IServicoQuadros: quadros, cartões de atividade, regra do limite de WIP,
+///          movimentação entre colunas e métricas (WIP, tempo de ciclo e lead time).
+///          Os tempos são calculados em minutos a partir dos Timestamps dos cartões.
+///          Observação: a interface não recebe o usuário logado, então a checagem de papel
+///          (GESTOR/DESENVOLVEDOR) nessas operações é feita na camada de apresentação.
+///
+// Requisitos 11 a 26
+class ServicoQuadros : public IServicoQuadros {
+private:
+    /// @brief Informa se um ano é bissexto (usado no cálculo de datas).
+    /// @param ano Ano com quatro dígitos.
+    /// @return true se o ano for bissexto.
+    static bool ehBissexto(int ano);
+
+    /// @brief Converte a sigla de um mês ("JAN" a "DEZ") em número de 0 a 11.
+    /// @param mes Sigla do mês, já validada pelo domínio Timestamp.
+    /// @return Número do mês (JAN = 0).
+    static int numeroDoMes(const std::string& mes);
+
+    /// @brief Converte um Timestamp em minutos corridos desde 01-JAN-2000-00:00.
+    /// @details Permite subtrair dois instantes para obter uma duração em minutos.
+    /// @param momento Data e hora a converter.
+    /// @return Quantidade de minutos desde 01-JAN-2000-00:00.
+    static long emMinutos(const Timestamp& momento);
+
+    /// @brief Conta os cartões do quadro que estão na coluna FAZENDO (o WIP).
+    /// @param idQuadro Identificador do quadro.
+    /// @return Quantidade de cartões em FAZENDO.
+    int contarEmFazendo(const Identificador& idQuadro) const;
+
+    /// @brief Garante que o quadro existe.
+    /// @param idQuadro Identificador do quadro.
+    /// @throw std::runtime_error Se o quadro não existir.
+    void exigirQuadro(const Identificador& idQuadro) const;
+
+    /// @brief Busca um cartão e garante que ele já está concluído (FEITO).
+    /// @param idCartao Identificador do cartão.
+    /// @return Cópia do cartão encontrado.
+    /// @throw std::runtime_error Se o cartão não existir ou não estiver em FEITO.
+    CartaoDeAtividade exigirCartaoConcluido(const Identificador& idCartao) const;
+
+    /// @brief Remove todos os cartões de um quadro (parte da exclusão em cascata).
+    /// @param idQuadro Identificador do quadro.
+    void removerCartoesDoQuadro(const Identificador& idQuadro) const;
+
+public:
+    virtual ~ServicoQuadros() = default;
+
+    ///
+    /// @brief Cria um quadro dentro de um projeto.
+    /// @param quadro Quadro já validado pelos domínios.
+    /// @param idProjeto Projeto que será dono do quadro.
+    /// @return true se criou.
+    /// @throw std::runtime_error Se o projeto não existir ou o identificador do quadro já existir.
+    ///
+    // Requisito 11
+    bool criarQuadro(const Quadro& quadro, const Identificador& idProjeto) override;
+
+    ///
+    /// @brief Consulta um quadro pelo identificador.
+    /// @param idQuadro Identificador do quadro.
+    /// @param quadro Recebe os dados encontrados.
+    /// @return true se encontrou; false se não existe (sem exceção).
+    ///
+    // Requisito 12
+    bool lerQuadro(const Identificador& idQuadro, Quadro& quadro) override;
+
+    ///
+    /// @brief Atualiza nome e limite de WIP de um quadro.
+    /// @details Um novo limite menor que o WIP atual (cartões em FAZENDO) é recusado.
+    /// @param quadro Quadro com o identificador chave e os novos dados.
+    /// @return true se atualizou.
+    /// @throw std::runtime_error Se o quadro não existir ou o novo limite for menor que o WIP atual.
+    ///
+    // Requisito 13
+    bool atualizarQuadro(const Quadro& quadro) override;
+
+    ///
+    /// @brief Exclui um quadro e todos os seus cartões.
+    /// @param idQuadro Identificador do quadro.
+    /// @return true se excluiu.
+    /// @throw std::runtime_error Se o quadro não existir.
+    ///
+    // Requisito 14
+    bool excluirQuadro(const Identificador& idQuadro) override;
+
+    ///
+    /// @brief Lista os quadros de um projeto.
+    /// @param idProjeto Identificador do projeto.
+    /// @return Vetor com os quadros (vazio se não houver).
+    ///
+    // Requisito 15
+    std::vector<Quadro> listarQuadrosPorProjeto(const Identificador& idProjeto) override;
+
+    ///
+    /// @brief Cria um cartão em um quadro.
+    /// @details O cartão sempre nasce na coluna A FAZER, mesmo que o objeto recebido tenha outro estado.
+    /// @param cartao Cartão já validado pelos domínios.
+    /// @param idQuadro Quadro que receberá o cartão.
+    /// @return true se criou.
+    /// @throw std::runtime_error Se o quadro não existir ou o identificador do cartão já existir.
+    ///
+    // Requisito 16
+    bool criarCartao(const CartaoDeAtividade& cartao, const Identificador& idQuadro) override;
+
+    ///
+    /// @brief Consulta um cartão pelo identificador.
+    /// @param idCartao Identificador do cartão.
+    /// @param cartao Recebe os dados encontrados.
+    /// @return true se encontrou; false se não existe (sem exceção).
+    ///
+    // Requisito 17
+    bool lerCartao(const Identificador& idCartao, CartaoDeAtividade& cartao) override;
+
+    ///
+    /// @brief Atualiza nome, descrição, prioridade e tamanho de um cartão.
+    /// @details Estado e timestamps são mantidos como estão: só moverCartao pode mudá-los.
+    /// @param cartao Cartão com o identificador chave e os novos dados.
+    /// @return true se atualizou.
+    /// @throw std::runtime_error Se o cartão não existir.
+    ///
+    // Requisito 18
+    bool atualizarCartao(const CartaoDeAtividade& cartao) override;
+
+    ///
+    /// @brief Exclui um cartão.
+    /// @param idCartao Identificador do cartão.
+    /// @return true se excluiu.
+    /// @throw std::runtime_error Se o cartão não existir.
+    ///
+    // Requisito 19
+    bool excluirCartao(const Identificador& idCartao) override;
+
+    ///
+    /// @brief Lista os cartões de um quadro.
+    /// @param idQuadro Identificador do quadro.
+    /// @return Vetor com os cartões (vazio se não houver).
+    ///
+    // Requisito 20
+    std::vector<CartaoDeAtividade> listarCartoesPorQuadro(const Identificador& idQuadro) override;
+
+    ///
+    /// @brief Move um cartão de coluna de um estado para outro.
+    /// @details Só são aceitas as passagens A FAZER -> FAZENDO e FAZENDO -> FEITO. Ao entrar em FAZENDO,
+    ///          o WIP não pode passar do limite do quadro. O horário da movimentação é gravado no cartão
+    ///          (início ao entrar em FAZENDO, término ao entrar em FEITO) e não pode ser anterior ao horário anterior.
+    /// @param idCartao Identificador do cartão.
+    /// @param novoEstado Coluna de destino.
+    /// @param momentoTransicao Data e hora da movimentação.
+    /// @return true se moveu.
+    /// @throw std::runtime_error Se o cartão não existir, a transição for inválida, o horário for anterior
+    ///        ao registrado ou o limite de WIP for excedido.
+    ///
+    // Requisito 21
+    bool moverCartao(const Identificador& idCartao, const Estado& novoEstado, const Timestamp& momentoTransicao) override;
+
+    ///
+    /// @brief Informa o WIP do quadro: quantos cartões estão em FAZENDO.
+    /// @param idQuadro Identificador do quadro.
+    /// @return Quantidade de cartões em FAZENDO.
+    /// @throw std::runtime_error Se o quadro não existir.
+    ///
+    // Requisito 26
+    int lerWip(const Identificador& idQuadro) override;
+
+    ///
+    /// @brief Tempo de ciclo de um cartão: de FAZENDO até FEITO.
+    /// @param idCartao Identificador do cartão.
+    /// @return Tempo de ciclo em minutos.
+    /// @throw std::runtime_error Se o cartão não existir ou ainda não estiver em FEITO.
+    ///
+    // Requisito 22
+    int lerTempoDeCiclo(const Identificador& idCartao) override;
+
+    ///
+    /// @brief Tempo de ciclo médio dos cartões concluídos de um quadro.
+    /// @param idQuadro Identificador do quadro.
+    /// @return Média em minutos; 0 se não houver cartões em FEITO.
+    /// @throw std::runtime_error Se o quadro não existir.
+    ///
+    // Requisito 23
+    double lerTempoDeCicloMedio(const Identificador& idQuadro) override;
+
+    ///
+    /// @brief Lead time de um cartão: da entrada em A FAZER até FEITO.
+    /// @param idCartao Identificador do cartão.
+    /// @return Lead time em minutos.
+    /// @throw std::runtime_error Se o cartão não existir ou ainda não estiver em FEITO.
+    ///
+    // Requisito 24
+    int lerLeadTime(const Identificador& idCartao) override;
+
+    ///
+    /// @brief Lead time médio dos cartões concluídos de um quadro.
+    /// @param idQuadro Identificador do quadro.
+    /// @return Média em minutos; 0 se não houver cartões em FEITO.
+    /// @throw std::runtime_error Se o quadro não existir.
+    ///
+    // Requisito 25
+    double lerLeadTimeMedio(const Identificador& idQuadro) override;
+};
+
 #endif // SERVICOS_HPP_INCLUDED
