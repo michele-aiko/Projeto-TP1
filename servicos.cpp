@@ -179,7 +179,7 @@ long ServicoQuadros::emMinutos(const Timestamp& momento) {
     for (int i = 2000; i < ano; ++i) totalDias += ehBissexto(i) ? 366 : 365;
     for (int j = 0; j < mes; ++j) {
         totalDias += DIAS_NO_MES[j];
-        if (j == 1 && ehBissexto(ano)) totalDias += 1; 
+        if (j == 1 && ehBissexto(ano)) totalDias += 1;
     }
     totalDias += dia - 1;
     //O sufixo `L` nos números avisa o compilador C++ para realizar todas as multiplicações usando o tipo `long`
@@ -345,26 +345,26 @@ bool ServicoQuadros::moverCartao(const Identificador& idCartao, const Estado& no
     }
 
     // Regra do WIP: só pode entrar em FAZENDO se WIP atual < limite WIP
-    if (iniciando) { 
-        Identificador idQuadro; 
-        Quadro quadro; 
-        
-        if (!ContainerCartoes::getInstancia()->obterQuadroDoCartao(idCartao, idQuadro) || !ContainerQuadros::getInstancia()->buscarQuadro(idQuadro, quadro)) { 
-            throw std::runtime_error("ServicoQuadros: Quadro do cartao '" + idCartao.getIdentificador() + "' nao encontrado."); 
-        } 
-        
-        if (contarEmFazendo(idQuadro) >= quadro.getLimite().getLimite()) { 
-            throw std::runtime_error("ServicoQuadros: Limite de WIP atingido. Conclua um cartao em FAZENDO antes de iniciar outro."); 
-        } 
-        
-        cartao.setInicio(momentoTransicao); 
-    
-    } else { 
-        cartao.setTermino(momentoTransicao); 
-    } 
-    
-    cartao.setEstado(novoEstado); 
-    ContainerCartoes::getInstancia()->atualizarCartao(cartao); 
+    if (iniciando) {
+        Identificador idQuadro;
+        Quadro quadro;
+
+        if (!ContainerCartoes::getInstancia()->obterQuadroDoCartao(idCartao, idQuadro) || !ContainerQuadros::getInstancia()->buscarQuadro(idQuadro, quadro)) {
+            throw std::runtime_error("ServicoQuadros: Quadro do cartao '" + idCartao.getIdentificador() + "' nao encontrado.");
+        }
+
+        if (contarEmFazendo(idQuadro) >= quadro.getLimite().getLimite()) {
+            throw std::runtime_error("ServicoQuadros: Limite de WIP atingido. Conclua um cartao em FAZENDO antes de iniciar outro.");
+        }
+
+        cartao.setInicio(momentoTransicao);
+
+    } else {
+        cartao.setTermino(momentoTransicao);
+    }
+
+    cartao.setEstado(novoEstado);
+    ContainerCartoes::getInstancia()->atualizarCartao(cartao);
     return true;
 }
 
@@ -408,3 +408,4 @@ double ServicoQuadros::lerLeadTimeMedio(const Identificador& idQuadro) {
     }
     return concluidos > 0 ? soma / concluidos : 0.0;
 }
+
