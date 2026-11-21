@@ -1,3 +1,10 @@
+///
+/// @brief Ponto de entrada do Sistema Kanban.
+/// @details Realiza a instanciação das camadas de serviço e apresentação, a disponibilização
+///          de dependências via interfaces abstratas, a execução de todos os conjuntos de 
+///          testes (unitários e fumaça) e a inicialização do loop principal do sistema.
+///
+
 #include "apresentacao.hpp"
 #include "servicos.hpp"
 #include "testeUnit.hpp"
@@ -5,23 +12,28 @@
 #include <iostream>
 #include <stdexcept>
 
-// A tela inicial com os menus de opcoes ficam em ApresentacaoControle.
-// Ainda sem rodar porque depende da criacao de outros objetos da apresentacao
-
 int main() {
-    // 1. Instanciação das Camadas Concretas (Serviços e Apresentação)
+    std::cout << "====================================================\n";
+    std::cout << "            INICIALIZANDO SISTEMA KANBAN            \n";
+    std::cout << "====================================================\n\n";
+
+    // -------------------------------------------------------------------------
+    // 1. INSTANCIAÇÃO DAS CAMADAS CONCRETAS (Serviços e Apresentação)
+    // -------------------------------------------------------------------------
     ServicoAutenticacao servicoAutenticacao;
-    ServicoPessoas servicoPessoas;
-    ServicoProjetos servicoProjetos;
-    ServicoQuadros servicoQuadros;
+    ServicoPessoas      servicoPessoas;
+    ServicoProjetos     servicoProjetos;
+    ServicoQuadros      servicoQuadros;
 
     ApresentacaoAutenticacao apresentacaoAutenticacao;
-    ApresentacaoPessoas apresentacaoPessoas;
-    ApresentacaoProjetos apresentacaoProjetos;
-    ApresentacaoQuadros apresentacaoQuadros;
-    ApresentacaoControle apresentacaoControle;
+    ApresentacaoPessoas      apresentacaoPessoas;
+    ApresentacaoProjetos     apresentacaoProjetos;
+    ApresentacaoQuadros      apresentacaoQuadros;
+    ApresentacaoControle     apresentacaoControle;
 
-    // 2. Injeção de Dependências (Ligação pelas Interfaces Abstratas)
+    // -------------------------------------------------------------------------
+    // 2. INJEÇÃO DE DEPENDÊNCIAS (Ligação pelas Interfaces Abstratas)
+    // -------------------------------------------------------------------------
     apresentacaoAutenticacao.setServico(&servicoAutenticacao);
     apresentacaoPessoas.setServico(&servicoPessoas);
     apresentacaoProjetos.setServico(&servicoProjetos);
@@ -31,36 +43,74 @@ int main() {
     apresentacaoControle.setApresentacaoPessoas(&apresentacaoPessoas);
     apresentacaoControle.setApresentacaoProjetos(&apresentacaoProjetos);
     apresentacaoControle.setApresentacaoQuadros(&apresentacaoQuadros);
+
     apresentacaoControle.setServicoPessoas(&servicoPessoas);
     apresentacaoControle.setServicoProjetos(&servicoProjetos);
     apresentacaoControle.setServicoQuadros(&servicoQuadros);
 
-    // 3. Testes (Unitários e Fumaça). Cada módulo acrescenta aqui a chamada dos seus próprios testes.
-    TUTesteServicos suiteTestes;
-    suiteTestes.executar();
-    TUServicoPessoas testesServicoPessoas;
-    testesServicoPessoas.executar();
-    TUApresentacaoPessoas testesApresentacaoPessoas;
-    testesApresentacaoPessoas.executar();
-    TFumacaPessoas fumacaPessoas;
-    fumacaPessoas.executar(apresentacaoPessoas);
-    TUApresentacaoControle testesControle;
-    testesControle.executar();
-    TFumacaControle fumacaControle;
-    fumacaControle.executar(apresentacaoControle);
-    TUServicoPessoas testesServicoPessoas;
-    testesServicoPessoas.executar();
+    // -------------------------------------------------------------------------
+    // 3. EXECUÇÃO DOS TESTES UNITÁRIOS (Domínios, Entidades, Serviços, Telas)
+    // -------------------------------------------------------------------------
+    TUDominios tuDominios;
+    tuDominios.executar();
 
-    // 4. Execução do sistema (tela inicial, login e menu principal)
+    TUEntidades tuEntidades;
+    tuEntidades.executar();
+
+    TUServicoAutenticacao tuServAut;
+    tuServAut.executar();
+
+    TUServicoPessoas tuServPes;
+    tuServPes.executar();
+
+    TUServicoProjetos tuServProj;
+    tuServProj.executar();
+
+    TUServicoQuadros tuServQuad;
+    tuServQuad.executar();
+
+    TUApresentacaoAutenticacao tuApAut;
+    tuApAut.executar();
+
+    TUApresentacaoPessoas tuApPes;
+    tuApPes.executar();
+
+    TUApresentacaoProjetos tuApProj;
+    tuApProj.executar();
+
+    TUApresentacaoQuadros tuApQuad;
+    tuApQuad.executar();
+
+    TUApresentacaoControle tuApCtrl;
+    tuApCtrl.executar();
+
+    // -------------------------------------------------------------------------
+    // 4. EXECUÇÃO DOS TESTES FUMAÇA (Integração Apresentação -> Serviço -> Dados)
+    // -------------------------------------------------------------------------
+    TFumacaPessoas tfPessoas;
+    tfPessoas.executar(apresentacaoPessoas);
+
+    TFumacaProjetos tfProjetos;
+    tfProjetos.executar(apresentacaoProjetos, servicoProjetos);
+
+    TFumacaQuadros tfQuadros;
+    tfQuadros.executar(apresentacaoQuadros, servicoQuadros, servicoProjetos);
+
+    TFumacaControle tfControle;
+    tfControle.executar(apresentacaoControle);
+
+    std::cout << ">>> TODOS OS TESTES PASSARAM COM SUCESSO! INICIANDO INTERFACE... <<<\n\n";
+
+    // -------------------------------------------------------------------------
+    // 5. EXECUÇÃO DO SISTEMA (Loop Principal de Menus do Usuário)
+    // -------------------------------------------------------------------------
     try {
         apresentacaoControle.executar();
     } catch (const std::runtime_error& e) {
-        std::cerr << "ERRO FATAL: " << e.what() << "\n";
+        std::cerr << ">>> ERRO FATAL NO SISTEMA: " << e.what() << "\n";
         return 1;
     }
 
     std::cout << "\nEncerrando o programa com sucesso.\n";
     return 0;
-
 }
-
