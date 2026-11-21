@@ -1,6 +1,6 @@
 #ifndef SERVICOS_HPP_INCLUDED
 #define SERVICOS_HPP_INCLUDED
- 
+
 #include "interfaces.hpp"
 #include "containerDados.hpp"
 #include <stdexcept>
@@ -353,3 +353,4 @@ public:
 };
 
 #endif // SERVICOS_HPP_INCLUDED
+
