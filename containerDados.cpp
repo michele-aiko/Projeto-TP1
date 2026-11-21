@@ -302,3 +302,4 @@ bool ContainerCartoes::existeCartao(const Identificador& id) const {
     return (tabelaCartoes.find(chave) != tabelaCartoes.end());
 }
 
+
